@@ -52,31 +52,38 @@
   - [x] Server actions (signIn, signUp, signOut, resetPassword)
   - [x] Client hooks (useAuth)
   - [x] Server helpers (getSession, requireSession)
-- [ ] Set up protected API routes
+- [x] Set up protected API routes
 
 ## Core Components
-- [ ] Create basic layout components
-- [ ] Set up routing structure
-- [ ] Create vote button components
-- [ ] Implement real-time vote display components
-- [ ] Set up admin dashboard layout
+- [x] Create basic layout components
+  - [x] MainLayout
+  - [x] DashboardLayout
+- [x] Set up routing structure
+  - [x] Public routes (/[eventSlug], /[eventSlug]/[itemSlug])
+  - [x] Admin routes (/dashboard, /dashboard/events/[id])
+- [x] Create vote button components
+  - [x] VoteButton
+  - [x] VoteResults
+  - [x] Subject
+- [x] Implement real-time vote display components
+- [x] Set up admin dashboard layout
 
 ## State Management
-- [ ] Set up global state management (if needed)
-- [ ] Implement real-time subscription handlers
-- [ ] Create vote management hooks
+- [x] Set up global state management (if needed)
+- [x] Implement real-time subscription handlers
+- [x] Create vote management hooks
 
 ## API Routes
-- [ ] Create vote submission endpoint
-- [ ] Set up real-time data fetching
-- [ ] Implement admin CRUD operations
-- [ ] Add rate limiting middleware
+- [x] Create vote submission endpoint
+- [x] Set up real-time data fetching
+- [x] Implement admin CRUD operations
+- [x] Add rate limiting middleware
 
 ## Styling
-- [ ] Set up TailwindCSS theme configuration
-- [ ] Create base component styles
-- [ ] Implement responsive design
-- [ ] Add loading states and animations
+- [x] Set up TailwindCSS theme configuration
+- [x] Create base component styles
+- [x] Implement responsive design
+- [x] Add loading states and animations
 
 ## Testing
 - [ ] Set up testing environment
@@ -91,17 +98,17 @@
 - [ ] Configure logging
 
 ## Documentation
-- [ ] Document API endpoints
-- [ ] Create component documentation
+- [x] Document API endpoints
+- [x] Create component documentation
 - [ ] Write deployment guide
 - [ ] Add contribution guidelines
 
 ## Security
-- [ ] Implement CORS policies
-- [ ] Set up CSP headers
-- [ ] Configure rate limiting
-- [ ] Add input validation
-- [ ] Set up security headers
+- [x] Implement CORS policies
+- [x] Set up CSP headers
+- [x] Configure rate limiting
+- [x] Add input validation
+- [x] Set up security headers
 
 ## Performance
 - [ ] Configure caching strategies

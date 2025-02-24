@@ -79,6 +79,41 @@ export interface Database {
           updated_at?: string
         }
       }
+      locations: {
+        Row: {
+          id: string
+          event_id: string
+          name: string
+          city: string | null
+          zip_code: string | null
+          lat: number | null
+          lon: number | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          name: string
+          city?: string | null
+          zip_code?: string | null
+          lat?: number | null
+          lon?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          name?: string
+          city?: string | null
+          zip_code?: string | null
+          lat?: number | null
+          lon?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
       subjects: {
         Row: {
           id: string
@@ -120,6 +155,7 @@ export interface Database {
           lat: number | null
           lon: number | null
           choice: boolean
+          location_id: string | null
           metadata: Json | null
           created_at: string
         }
@@ -131,6 +167,7 @@ export interface Database {
           lat?: number | null
           lon?: number | null
           choice: boolean
+          location_id?: string | null
           metadata?: Json | null
           created_at?: string
         }
@@ -142,6 +179,7 @@ export interface Database {
           lat?: number | null
           lon?: number | null
           choice?: boolean
+          location_id?: string | null
           metadata?: Json | null
           created_at?: string
         }
