@@ -1,18 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
-interface VoteButtonProps {
+export interface VoteButtonProps {
   subjectId: string;
   locationId?: string;
   choice: boolean;
   label: string;
-  variant?: 'positive' | 'negative' | 'neutral';
+  variant: 'positive' | 'negative';
   disabled?: boolean;
   onVoteSuccess?: () => void;
+  icon?: React.ReactNode;
+  size?: 'default' | 'sm' | 'lg';
 }
 
 export function VoteButton({
@@ -20,9 +22,11 @@ export function VoteButton({
   locationId,
   choice,
   label,
-  variant = 'neutral',
+  variant,
   disabled = false,
   onVoteSuccess,
+  icon,
+  size = 'default'
 }: VoteButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,20 +47,14 @@ export function VoteButton({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to cast vote');
+        throw new Error(error.message || 'Failed to submit vote');
       }
-
-      toast.success('Vote cast successfully', {
-        description: 'Your vote has been recorded.',
-      });
 
       if (onVoteSuccess) {
         onVoteSuccess();
       }
     } catch (error) {
-      toast.error('Error', {
-        description: error instanceof Error ? error.message : 'Failed to cast vote',
-      });
+      console.error('Error submitting vote:', error);
     } finally {
       setIsLoading(false);
     }
@@ -66,13 +64,20 @@ export function VoteButton({
     <Button
       onClick={handleVote}
       disabled={disabled || isLoading}
+      size={size}
       className={cn(
-        'min-w-[100px] transition-all',
-        variant === 'positive' && 'bg-green-600 hover:bg-green-700',
-        variant === 'negative' && 'bg-red-600 hover:bg-red-700'
+        size === 'sm' ? 'h-6 px-2' : 'flex-1',
+        variant === 'positive' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
       )}
     >
-      {isLoading ? 'Voting...' : label}
+      {isLoading ? (
+        <Loader2 className="h-3 w-3 animate-spin" />
+      ) : (
+        <>
+          {icon}
+          {label && <span className={icon ? 'ml-2' : ''}>{label}</span>}
+        </>
+      )}
     </Button>
   );
 } 

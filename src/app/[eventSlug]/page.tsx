@@ -4,6 +4,8 @@ import { Subject } from '@/components/vote/Subject';
 import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { ClientLocationSelector } from '@/components/location/ClientLocationSelector';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 interface EventPageProps {
   params: {
@@ -54,25 +56,47 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     );
   }
   
-  // Fetch subjects for this event
-  const { data: subjects, error: subjectsError } = await supabase
+  // Fetch subjects for this event (directly under the event, not under items)
+  const { data: eventSubjects, error: eventSubjectsError } = await supabase
     .from('subjects')
     .select('id, label, pos_label, neg_label')
     .eq('event_id', event.id)
-    .is('item_id', null); // Only get subjects directly under the event, not under items
+    .is('item_id', null);
   
-  if (subjectsError) {
+  // Fetch items for this event
+  const { data: items, error: itemsError } = await supabase
+    .from('items')
+    .select('id, name, item_slug')
+    .eq('event_id', event.id);
+  
+  // Fetch subjects for all items under this event
+  const { data: itemSubjects, error: itemSubjectsError } = await supabase
+    .from('subjects')
+    .select('id, label, pos_label, neg_label, item_id')
+    .eq('event_id', event.id)
+    .not('item_id', 'is', null);
+  
+  if (eventSubjectsError || itemsError || itemSubjectsError) {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">{event.title}</h1>
           <div className="bg-destructive/10 p-4 rounded-md text-destructive">
-            Error loading subjects: {subjectsError.message}
+            Error loading data: {eventSubjectsError?.message || itemsError?.message || itemSubjectsError?.message}
           </div>
         </div>
       </div>
     );
   }
+  
+  // Group item subjects by item_id for easier rendering
+  const itemSubjectsByItemId = (itemSubjects || []).reduce((acc, subject) => {
+    if (!acc[subject.item_id]) {
+      acc[subject.item_id] = [];
+    }
+    acc[subject.item_id].push(subject);
+    return acc;
+  }, {} as Record<string, typeof itemSubjects>);
   
   return (
     <div className="container mx-auto px-4 py-12">
@@ -87,9 +111,11 @@ export default async function EventPage({ params, searchParams }: EventPageProps
           </Suspense>
         </div>
         
-        {subjects && subjects.length > 0 ? (
-          <div className="space-y-8">
-            {subjects.map((subject) => (
+        {/* Event-level subjects */}
+        {eventSubjects && eventSubjects.length > 0 ? (
+          <div className="space-y-8 mb-12">
+            <h2 className="text-xl font-semibold">Event Questions</h2>
+            {eventSubjects.map((subject) => (
               <Subject
                 key={subject.id}
                 id={subject.id}
@@ -101,10 +127,76 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             ))}
           </div>
         ) : (
-          <div className="text-center p-12 border rounded-md">
-            <h3 className="text-lg font-medium mb-2">No subjects found</h3>
+          <div className="text-center p-8 border rounded-md mb-12">
+            <h3 className="text-lg font-medium mb-2">No event questions</h3>
             <p className="text-muted-foreground">
               There are no voting subjects available for this event yet.
+            </p>
+          </div>
+        )}
+        
+        {/* Divider */}
+        {items && items.length > 0 && (
+          <div className="relative my-12">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-background px-4 text-sm text-muted-foreground">
+                Items
+              </span>
+            </div>
+          </div>
+        )}
+        
+        {/* Items with their subjects */}
+        {items && items.length > 0 && (
+          <div className="space-y-12">
+            {items.map((item) => {
+              const subjects = itemSubjectsByItemId[item.id] || [];
+              
+              return (
+                <div key={item.id} className="border rounded-lg p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold">{item.name}</h2>
+                    <Link href={`/${eventSlug}/${item.item_slug}`} className="text-sm text-primary flex items-center">
+                      View Item Page
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </div>
+                  
+                  {subjects.length > 0 ? (
+                    <div className="space-y-6">
+                      {subjects.map((subject) => (
+                        <Subject
+                          key={subject.id}
+                          id={subject.id}
+                          label={subject.label}
+                          posLabel={subject.pos_label}
+                          negLabel={subject.neg_label}
+                          locationId={locationId || undefined}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center p-4 border rounded-md">
+                      <p className="text-muted-foreground">
+                        No questions available for this item.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
+        {/* No items message */}
+        {(!items || items.length === 0) && (!eventSubjects || eventSubjects.length === 0) && (
+          <div className="text-center p-12 border rounded-md">
+            <h3 className="text-lg font-medium mb-2">No content found</h3>
+            <p className="text-muted-foreground">
+              There are no voting subjects or items available for this event yet.
             </p>
           </div>
         )}

@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { VoteButton } from './VoteButton';
 import { VoteResults } from './VoteResults';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface SubjectProps {
   id: string;
@@ -21,44 +22,53 @@ export function Subject({ id, label, posLabel, negLabel, locationId }: SubjectPr
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">{label}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <VoteResults
-          subjectId={id}
-          locationId={locationId}
-          posLabel={posLabel}
-          negLabel={negLabel}
-        />
-
-        {!hasVoted && (
-          <div className="flex justify-between gap-4 mt-4">
-            <VoteButton
+    <Card className="overflow-hidden mb-2">
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between">
+          {/* Question */}
+          <div className="font-medium text-sm">{label}</div>
+          
+          {/* Simplified vote results and buttons in a single row */}
+          <div className="flex items-center gap-2">
+            <VoteResults
               subjectId={id}
               locationId={locationId}
-              choice={true}
-              label={posLabel}
-              variant="positive"
-              onVoteSuccess={handleVoteSuccess}
+              posLabel={posLabel}
+              negLabel={negLabel}
+              simplified={true}
+              ultraCompact={true}
             />
-            <VoteButton
-              subjectId={id}
-              locationId={locationId}
-              choice={false}
-              label={negLabel}
-              variant="negative"
-              onVoteSuccess={handleVoteSuccess}
-            />
+            
+            {!hasVoted ? (
+              <div className="flex gap-1">
+                <VoteButton
+                  subjectId={id}
+                  locationId={locationId}
+                  choice={true}
+                  label=""
+                  variant="positive"
+                  onVoteSuccess={handleVoteSuccess}
+                  icon={<ThumbsUp className="h-3 w-3" />}
+                  size="sm"
+                />
+                <VoteButton
+                  subjectId={id}
+                  locationId={locationId}
+                  choice={false}
+                  label=""
+                  variant="negative"
+                  onVoteSuccess={handleVoteSuccess}
+                  icon={<ThumbsDown className="h-3 w-3" />}
+                  size="sm"
+                />
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground">
+                Thanks!
+              </div>
+            )}
           </div>
-        )}
-
-        {hasVoted && (
-          <div className="text-center text-sm text-muted-foreground">
-            Thank you for voting!
-          </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
