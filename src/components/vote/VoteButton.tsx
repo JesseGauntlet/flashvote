@@ -15,6 +15,7 @@ export interface VoteButtonProps {
   onVoteSuccess?: () => void;
   icon?: React.ReactNode;
   size?: 'default' | 'sm' | 'lg';
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export function VoteButton({
@@ -26,9 +27,11 @@ export function VoteButton({
   disabled = false,
   onVoteSuccess,
   icon,
-  size = 'default'
+  size = 'default',
+  onClick
 }: VoteButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleVote = async () => {
     setIsLoading(true);
@@ -50,6 +53,12 @@ export function VoteButton({
         throw new Error(error.message || 'Failed to submit vote');
       }
 
+      // Show feedback animation
+      setShowFeedback(true);
+      setTimeout(() => {
+        setShowFeedback(false);
+      }, 500); // Flash for 500ms
+
       if (onVoteSuccess) {
         onVoteSuccess();
       }
@@ -62,16 +71,22 @@ export function VoteButton({
 
   return (
     <Button
-      onClick={handleVote}
+      onClick={(e) => {
+        if (onClick) onClick(e);
+        if (!e.defaultPrevented) handleVote();
+      }}
       disabled={disabled || isLoading}
       size={size}
       className={cn(
-        size === 'sm' ? 'h-6 px-2' : 'flex-1',
-        variant === 'positive' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+        size === 'sm' ? 'h-8 px-3' : 'flex-1',
+        variant === 'positive' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700',
+        showFeedback && variant === 'positive' ? 'animate-pulse-green' : '',
+        showFeedback && variant === 'negative' ? 'animate-pulse-red' : '',
+        'transition-all duration-300'
       )}
     >
       {isLoading ? (
-        <Loader2 className="h-3 w-3 animate-spin" />
+        <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <>
           {icon}

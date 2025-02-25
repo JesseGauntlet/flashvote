@@ -72,7 +72,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   // Fetch subjects for all items under this event
   const { data: itemSubjects, error: itemSubjectsError } = await supabase
     .from('subjects')
-    .select('id, label, pos_label, neg_label, item_id')
+    .select('id, label, pos_label, neg_label, item_id, metadata')
     .eq('event_id', event.id)
     .not('item_id', 'is', null);
   
@@ -90,13 +90,24 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   }
   
   // Group item subjects by item_id for easier rendering
-  const itemSubjectsByItemId = (itemSubjects || []).reduce((acc, subject) => {
-    if (!acc[subject.item_id]) {
-      acc[subject.item_id] = [];
+  // Separate default subjects (empty label) from regular subjects
+  const itemSubjectsByItemId: Record<string, { defaultSubject?: any, regularSubjects: any[] }> = {};
+  
+  (itemSubjects || []).forEach((subject) => {
+    if (!itemSubjectsByItemId[subject.item_id]) {
+      itemSubjectsByItemId[subject.item_id] = { regularSubjects: [] };
     }
-    acc[subject.item_id].push(subject);
-    return acc;
-  }, {} as Record<string, typeof itemSubjects>);
+    
+    // Check if this is a default subject (empty label or metadata.is_default)
+    const isDefault = !subject.label || 
+      (subject.metadata && subject.metadata.is_default === true);
+    
+    if (isDefault) {
+      itemSubjectsByItemId[subject.item_id].defaultSubject = subject;
+    } else {
+      itemSubjectsByItemId[subject.item_id].regularSubjects.push(subject);
+    }
+  });
   
   return (
     <div className="container mx-auto px-4 py-12">
@@ -151,40 +162,41 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         
         {/* Items with their subjects */}
         {items && items.length > 0 && (
-          <div className="space-y-12">
+          <div className="space-y-6">
             {items.map((item) => {
-              const subjects = itemSubjectsByItemId[item.id] || [];
+              const { defaultSubject, regularSubjects } = itemSubjectsByItemId[item.id] || 
+                { defaultSubject: undefined, regularSubjects: [] };
               
               return (
-                <div key={item.id} className="border rounded-lg p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold">{item.name}</h2>
-                    <Link href={`/${eventSlug}/${item.item_slug}`} className="text-sm text-primary flex items-center">
-                      View Item Page
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </div>
-                  
-                  {subjects.length > 0 ? (
-                    <div className="space-y-6">
-                      {subjects.map((subject) => (
+                <div 
+                  key={item.id} 
+                  className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="p-4 bg-muted/30">
+                    <div className="flex justify-between items-center mb-2">
+                      <Link 
+                        href={`/${eventSlug}/${item.item_slug}`}
+                        className="text-lg font-semibold hover:underline flex items-center gap-1"
+                      >
+                        {item.name}
+                        <ArrowRight className="h-4 w-4 opacity-50" />
+                      </Link>
+                    </div>
+                    
+                    {/* Default subject (implicit rating) */}
+                    {defaultSubject && (
+                      <div className="p-1">
                         <Subject
-                          key={subject.id}
-                          id={subject.id}
-                          label={subject.label}
-                          posLabel={subject.pos_label}
-                          negLabel={subject.neg_label}
+                          key={defaultSubject.id}
+                          id={defaultSubject.id}
+                          label=""
+                          posLabel={defaultSubject.pos_label}
+                          negLabel={defaultSubject.neg_label}
                           locationId={locationId || undefined}
                         />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center p-4 border rounded-md">
-                      <p className="text-muted-foreground">
-                        No questions available for this item.
-                      </p>
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}

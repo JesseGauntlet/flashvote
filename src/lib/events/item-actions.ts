@@ -83,6 +83,23 @@ export async function createItem(data: CreateItemData) {
     throw new Error(error.message || 'Failed to create item');
   }
   
+  // Automatically create a default subject for this item (implicit rating)
+  const { error: subjectError } = await supabase
+    .from('subjects')
+    .insert({
+      label: '', // Empty label indicates this is an implicit rating
+      pos_label: 'Recommend',
+      neg_label: 'Not Recommended',
+      event_id: data.event_id,
+      item_id: item.id,
+      metadata: { is_default: true } // Mark this as the default subject
+    });
+  
+  if (subjectError) {
+    console.error('Error creating default subject for item:', subjectError);
+    // We don't throw here to avoid blocking item creation if subject creation fails
+  }
+  
   // Revalidate the event page
   revalidatePath(`/dashboard/events/${data.event_id}`);
   if (event) {

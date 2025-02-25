@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ClientLocationSelector } from '@/components/location/ClientLocationSelector';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ItemPageProps {
   params: {
@@ -74,7 +75,7 @@ export default async function ItemPage({ params, searchParams }: ItemPageProps) 
   // Fetch subjects for this item
   const { data: subjects, error: subjectsError } = await supabase
     .from('subjects')
-    .select('id, label, pos_label, neg_label')
+    .select('id, label, pos_label, neg_label, metadata')
     .eq('event_id', event.id)
     .eq('item_id', item.id);
   
@@ -90,6 +91,15 @@ export default async function ItemPage({ params, searchParams }: ItemPageProps) 
       </div>
     );
   }
+  
+  // Separate default subject (empty label) from regular subjects
+  const defaultSubject = subjects?.find(subject => 
+    !subject.label || (subject.metadata && subject.metadata.is_default === true)
+  );
+  
+  const regularSubjects = subjects?.filter(subject => 
+    subject.label && (!subject.metadata || subject.metadata.is_default !== true)
+  ) || [];
   
   return (
     <div className="container mx-auto px-4 py-12">
@@ -112,20 +122,40 @@ export default async function ItemPage({ params, searchParams }: ItemPageProps) 
           </Suspense>
         </div>
         
-        {subjects && subjects.length > 0 ? (
-          <div className="space-y-8">
-            {subjects.map((subject) => (
+        {/* Default subject (implicit rating) */}
+        {defaultSubject && (
+          <Card className="mb-8 bg-muted/30 overflow-hidden">
+            <CardContent className="p-4">
+              <div className="mb-2 text-lg font-medium">Rate this item</div>
               <Subject
-                key={subject.id}
-                id={subject.id}
-                label={subject.label}
-                posLabel={subject.pos_label}
-                negLabel={subject.neg_label}
+                key={defaultSubject.id}
+                id={defaultSubject.id}
+                label=""
+                posLabel={defaultSubject.pos_label}
+                negLabel={defaultSubject.neg_label}
                 locationId={locationId || undefined}
               />
-            ))}
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Regular subjects with questions */}
+        {regularSubjects.length > 0 ? (
+          <div>
+            <div className="space-y-4">
+              {regularSubjects.map((subject) => (
+                <Subject
+                  key={subject.id}
+                  id={subject.id}
+                  label={subject.label}
+                  posLabel={subject.pos_label}
+                  negLabel={subject.neg_label}
+                  locationId={locationId || undefined}
+                />
+              ))}
+            </div>
           </div>
-        ) : (
+        ) : defaultSubject ? null : (
           <div className="text-center p-12 border rounded-md">
             <h3 className="text-lg font-medium mb-2">No subjects found</h3>
             <p className="text-muted-foreground">

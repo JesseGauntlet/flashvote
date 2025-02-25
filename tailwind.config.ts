@@ -55,7 +55,21 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+      keyframes: {
+        "pulse-green": {
+          "0%, 100%": { backgroundColor: "rgb(22 163 74)" }, // green-600
+          "50%": { backgroundColor: "rgb(134 239 172)", color: "rgb(20 83 45)" }, // green-300 with green-900 text
+        },
+        "pulse-red": {
+          "0%, 100%": { backgroundColor: "rgb(220 38 38)" }, // red-600
+          "50%": { backgroundColor: "rgb(252 165 165)", color: "rgb(127 29 29)" }, // red-300 with red-900 text
+        },
+      },
+      animation: {
+        "pulse-green": "pulse-green 0.5s ease-in-out",
+        "pulse-red": "pulse-red 0.5s ease-in-out",
+      },
   	}
   },
   plugins: [require("tailwindcss-animate")],
