@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Subject } from '@/components/vote/Subject';
-import { LocationSelector } from '@/components/location/LocationSelector';
 import { Suspense } from 'react';
 import { Toaster } from 'sonner';
+import { ClientLocationSelector } from '@/components/location/ClientLocationSelector';
 
 interface EventPageProps {
   params: {
@@ -15,8 +15,14 @@ interface EventPageProps {
 }
 
 export default async function EventPage({ params, searchParams }: EventPageProps) {
-  const { eventSlug } = params;
-  const locationId = searchParams.location || null;
+  // First, await both params and searchParams to ensure they're fully resolved
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  
+  // Now it's safe to destructure them
+  const { eventSlug } = resolvedParams;
+  const { location } = resolvedSearchParams;
+  const locationId = location || null;
   
   const supabase = await createClient();
   
@@ -104,41 +110,5 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         )}
       </div>
     </div>
-  );
-}
-
-// Client component for location selector with state
-'use client';
-
-import { useState } from 'react';
-
-function ClientLocationSelector({ 
-  eventId, 
-  initialLocationId 
-}: { 
-  eventId: string; 
-  initialLocationId: string | null;
-}) {
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(initialLocationId);
-  
-  const handleLocationChange = (locationId: string | null) => {
-    setSelectedLocationId(locationId);
-    
-    // Update URL with the selected location
-    const url = new URL(window.location.href);
-    if (locationId) {
-      url.searchParams.set('location', locationId);
-    } else {
-      url.searchParams.delete('location');
-    }
-    window.history.pushState({}, '', url.toString());
-  };
-  
-  return (
-    <LocationSelector
-      eventId={eventId}
-      selectedLocationId={selectedLocationId}
-      onLocationChange={handleLocationChange}
-    />
   );
 } 

@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Get user ID if authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    const user_id = session?.user?.id;
+    const { data: { user } } = await supabase.auth.getUser();
+    const user_id = user?.id;
     
     // Insert vote
     const { data, error } = await supabase

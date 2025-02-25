@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { SubjectsList } from '../../SubjectsList';
 import { Toaster } from 'sonner';
+import { Database } from '@/types/supabase';
 
 interface ItemPageProps {
   params: {
@@ -16,7 +17,18 @@ interface ItemPageProps {
   };
 }
 
+// Define types for the data we're fetching
+type Event = Database['public']['Tables']['events']['Row'];
+type Item = Database['public']['Tables']['items']['Row'];
+type Subject = Database['public']['Tables']['subjects']['Row'];
+
 export default async function ItemPage({ params }: ItemPageProps) {
+  // First, await the params object to ensure it's fully resolved
+  const resolvedParams = await params;
+  
+  // Now it's safe to destructure
+  const { id, itemId } = resolvedParams;
+  
   const session = await requireSession();
   const supabase = await createClient();
   
@@ -24,7 +36,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const { data: event, error: eventError } = await supabase
     .from('events')
     .select('id, title, slug, owner_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
   
   if (eventError || !event) {
@@ -35,8 +47,8 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const { data: item, error: itemError } = await supabase
     .from('items')
     .select('id, name, item_slug, image_url')
-    .eq('id', params.itemId)
-    .eq('event_id', params.id)
+    .eq('id', itemId)
+    .eq('event_id', id)
     .single();
   
   if (itemError || !item) {
@@ -49,7 +61,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
-      .eq('event_id', params.id)
+      .eq('event_id', id)
       .eq('user_id', session.user.id)
       .single();
       
@@ -62,8 +74,8 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const { data: subjects } = await supabase
     .from('subjects')
     .select('id, label, pos_label, neg_label, event_id, item_id, metadata, created_at')
-    .eq('event_id', params.id)
-    .eq('item_id', params.itemId);
+    .eq('event_id', id)
+    .eq('item_id', itemId);
   
   return (
     <DashboardLayout>
@@ -72,7 +84,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link href={`/dashboard/events/${params.id}`}>
+            <Link href={`/dashboard/events/${id}`}>
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>

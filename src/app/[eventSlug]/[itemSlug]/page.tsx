@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { ClientLocationSelector } from '@/components/location/ClientLocationSelector';
 
 interface ItemPageProps {
   params: {
@@ -19,8 +20,14 @@ interface ItemPageProps {
 }
 
 export default async function ItemPage({ params, searchParams }: ItemPageProps) {
-  const { eventSlug, itemSlug } = params;
-  const locationId = searchParams.location || null;
+  // First, await both params and searchParams to ensure they're fully resolved
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  
+  // Now it's safe to destructure them
+  const { eventSlug, itemSlug } = resolvedParams;
+  const { location } = resolvedSearchParams;
+  const locationId = location || null;
   
   const supabase = await createClient();
   
@@ -128,41 +135,5 @@ export default async function ItemPage({ params, searchParams }: ItemPageProps) 
         )}
       </div>
     </div>
-  );
-}
-
-// Client component for location selector with state
-'use client';
-
-import { useState } from 'react';
-
-function ClientLocationSelector({ 
-  eventId, 
-  initialLocationId 
-}: { 
-  eventId: string; 
-  initialLocationId: string | null;
-}) {
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(initialLocationId);
-  
-  const handleLocationChange = (locationId: string | null) => {
-    setSelectedLocationId(locationId);
-    
-    // Update URL with the selected location
-    const url = new URL(window.location.href);
-    if (locationId) {
-      url.searchParams.set('location', locationId);
-    } else {
-      url.searchParams.delete('location');
-    }
-    window.history.pushState({}, '', url.toString());
-  };
-  
-  return (
-    <LocationSelector
-      eventId={eventId}
-      selectedLocationId={selectedLocationId}
-      onLocationChange={handleLocationChange}
-    />
   );
 } 

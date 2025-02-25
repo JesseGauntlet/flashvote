@@ -121,6 +121,11 @@ create policy "Owners can update their events"
     using (auth.uid() = owner_id)
     with check (auth.uid() = owner_id);
 
+-- Events: Authenticated users can create events
+create policy "Authenticated users can create events"
+    on events for insert
+    with check (auth.uid() = owner_id);
+
 -- Items: Anyone can read items of non-archived events
 create policy "Anyone can read items"
     on items for select
@@ -132,15 +137,72 @@ create policy "Anyone can read items"
         )
     );
 
+-- Items: Event owners and admins can create/update/delete items
+create policy "Event owners and admins can manage items"
+    on items for all
+    using (
+        exists (
+            select 1 from events
+            where events.id = items.event_id
+            and (
+                events.owner_id = auth.uid()
+                or exists (
+                    select 1 from admins
+                    where admins.event_id = items.event_id
+                    and admins.user_id = auth.uid()
+                    and admins.role in ('owner', 'editor')
+                )
+            )
+        )
+    );
+
 -- Locations: Anyone can read locations
 create policy "Anyone can read locations"
     on locations for select
     using (true);
 
+-- Locations: Event owners and admins can manage locations
+create policy "Event owners and admins can manage locations"
+    on locations for all
+    using (
+        exists (
+            select 1 from events
+            where events.id = locations.event_id
+            and (
+                events.owner_id = auth.uid()
+                or exists (
+                    select 1 from admins
+                    where admins.event_id = locations.event_id
+                    and admins.user_id = auth.uid()
+                    and admins.role in ('owner', 'editor')
+                )
+            )
+        )
+    );
+
 -- Subjects: Anyone can read subjects
 create policy "Anyone can read subjects"
     on subjects for select
     using (true);
+
+-- Subjects: Event owners and admins can manage subjects
+create policy "Event owners and admins can manage subjects"
+    on subjects for all
+    using (
+        exists (
+            select 1 from events
+            where events.id = subjects.event_id
+            and (
+                events.owner_id = auth.uid()
+                or exists (
+                    select 1 from admins
+                    where admins.event_id = subjects.event_id
+                    and admins.user_id = auth.uid()
+                    and admins.role in ('owner', 'editor')
+                )
+            )
+        )
+    );
 
 -- Votes: Anyone can create votes (rate limiting handled in application)
 create policy "Anyone can create votes"
@@ -156,6 +218,17 @@ create policy "Anyone can read votes"
 create policy "Admins can read own roles"
     on admins for select
     using (auth.uid() = user_id);
+
+-- Admins: Event owners can manage admins
+create policy "Event owners can manage admins"
+    on admins for all
+    using (
+        exists (
+            select 1 from events
+            where events.id = admins.event_id
+            and events.owner_id = auth.uid()
+        )
+    );
 
 -- Create triggers for updated_at
 create or replace function update_updated_at_column()

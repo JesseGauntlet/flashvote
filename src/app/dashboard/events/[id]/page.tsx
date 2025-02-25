@@ -11,6 +11,7 @@ import { EventDetailsForm } from './EventDetailsForm';
 import { SubjectsList } from './SubjectsList';
 import { ItemsList } from './ItemsList';
 import { Toaster } from 'sonner';
+import { Database } from '@/types/supabase';
 
 interface EventPageProps {
   params: {
@@ -18,7 +19,18 @@ interface EventPageProps {
   };
 }
 
+// Define types for the data we're fetching
+type Event = Database['public']['Tables']['events']['Row'];
+type Subject = Database['public']['Tables']['subjects']['Row'];
+type Item = Database['public']['Tables']['items']['Row'];
+
 export default async function EventPage({ params }: EventPageProps) {
+  // First, await the params object to ensure it's fully resolved
+  const resolvedParams = await params;
+  
+  // Now it's safe to destructure
+  const { id } = resolvedParams;
+  
   const session = await requireSession();
   const supabase = await createClient();
   
@@ -26,7 +38,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const { data: event, error } = await supabase
     .from('events')
     .select('id, title, slug, owner_id, is_premium, archived_at, created_at')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
   
   if (error || !event) {
@@ -39,7 +51,7 @@ export default async function EventPage({ params }: EventPageProps) {
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
-      .eq('event_id', params.id)
+      .eq('event_id', id)
       .eq('user_id', session.user.id)
       .single();
       
@@ -52,14 +64,14 @@ export default async function EventPage({ params }: EventPageProps) {
   const { data: subjects } = await supabase
     .from('subjects')
     .select('id, label, pos_label, neg_label')
-    .eq('event_id', params.id)
+    .eq('event_id', id)
     .is('item_id', null);
   
-  // Fetch items for this event
+  // Fetch items for this event with all required fields
   const { data: items } = await supabase
     .from('items')
-    .select('id, name, item_slug')
-    .eq('event_id', params.id);
+    .select('id, name, item_slug, event_id, item_id, image_url, metadata, created_at, updated_at')
+    .eq('event_id', id);
   
   return (
     <DashboardLayout>

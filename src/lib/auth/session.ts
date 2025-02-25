@@ -5,9 +5,16 @@ export async function getSession() {
   const supabase = await createClient()
   
   try {
-    const { data: { session }, error } = await supabase.auth.getSession()
+    const { data: { user }, error } = await supabase.auth.getUser()
     if (error) throw error
-    return session
+    
+    if (!user) return null
+    
+    // Create a session-like object with the user
+    return {
+      user,
+      // Add any other session properties you need
+    }
   } catch (error) {
     return null
   }

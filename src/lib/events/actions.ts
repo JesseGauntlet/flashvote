@@ -12,10 +12,10 @@ export interface CreateEventData {
 export async function createEvent(data: CreateEventData) {
   const supabase = await createClient();
   
-  // Get the current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user || userError) {
     throw new Error('You must be logged in to create an event');
   }
   
@@ -42,7 +42,7 @@ export async function createEvent(data: CreateEventData) {
     .insert({
       title: data.title,
       slug: data.slug,
-      owner_id: session.user.id,
+      owner_id: user.id,
       is_premium: false, // Default to free tier
     })
     .select()
@@ -63,10 +63,10 @@ export async function createEvent(data: CreateEventData) {
 export async function updateEvent(eventId: string, data: Partial<CreateEventData>) {
   const supabase = await createClient();
   
-  // Get the current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user || userError) {
     throw new Error('You must be logged in to update an event');
   }
   
@@ -77,13 +77,13 @@ export async function updateEvent(eventId: string, data: Partial<CreateEventData
     .eq('id', eventId)
     .single();
     
-  if (!event || event.owner_id !== session.user.id) {
+  if (!event || event.owner_id !== user.id) {
     // Also check if user is an admin for this event
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
       .eq('event_id', eventId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
       
     if (!adminRole || adminRole.role === 'viewer') {
@@ -132,10 +132,10 @@ export async function updateEvent(eventId: string, data: Partial<CreateEventData
 export async function archiveEvent(eventId: string) {
   const supabase = await createClient();
   
-  // Get the current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user || userError) {
     throw new Error('You must be logged in to archive an event');
   }
   
@@ -146,7 +146,7 @@ export async function archiveEvent(eventId: string) {
     .eq('id', eventId)
     .single();
     
-  if (!event || event.owner_id !== session.user.id) {
+  if (!event || event.owner_id !== user.id) {
     throw new Error('You do not have permission to archive this event');
   }
   
@@ -171,10 +171,10 @@ export async function archiveEvent(eventId: string) {
 export async function unarchiveEvent(eventId: string) {
   const supabase = await createClient();
   
-  // Get the current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user || userError) {
     throw new Error('You must be logged in to unarchive an event');
   }
   
@@ -185,7 +185,7 @@ export async function unarchiveEvent(eventId: string) {
     .eq('id', eventId)
     .single();
     
-  if (!event || event.owner_id !== session.user.id) {
+  if (!event || event.owner_id !== user.id) {
     throw new Error('You do not have permission to unarchive this event');
   }
   

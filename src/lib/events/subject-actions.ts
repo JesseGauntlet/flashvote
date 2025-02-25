@@ -14,10 +14,10 @@ export interface CreateSubjectData {
 export async function createSubject(data: CreateSubjectData) {
   const supabase = await createClient();
   
-  // Get the current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user || userError) {
     throw new Error('You must be logged in to create a subject');
   }
   
@@ -28,13 +28,13 @@ export async function createSubject(data: CreateSubjectData) {
     .eq('id', data.event_id)
     .single();
     
-  if (!event || event.owner_id !== session.user.id) {
+  if (!event || event.owner_id !== user.id) {
     // Also check if user is an admin for this event
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
       .eq('event_id', data.event_id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
       
     if (!adminRole || adminRole.role === 'viewer') {
@@ -85,10 +85,10 @@ export async function createSubject(data: CreateSubjectData) {
 export async function updateSubject(subjectId: string, data: Partial<Omit<CreateSubjectData, 'event_id' | 'item_id'>>) {
   const supabase = await createClient();
   
-  // Get the current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user || userError) {
     throw new Error('You must be logged in to update a subject');
   }
   
@@ -110,13 +110,13 @@ export async function updateSubject(subjectId: string, data: Partial<Omit<Create
     .eq('id', subject.event_id)
     .single();
     
-  if (!event || event.owner_id !== session.user.id) {
+  if (!event || event.owner_id !== user.id) {
     // Also check if user is an admin for this event
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
       .eq('event_id', subject.event_id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
       
     if (!adminRole || adminRole.role === 'viewer') {
@@ -147,10 +147,10 @@ export async function updateSubject(subjectId: string, data: Partial<Omit<Create
 export async function deleteSubject(subjectId: string) {
   const supabase = await createClient();
   
-  // Get the current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user || userError) {
     throw new Error('You must be logged in to delete a subject');
   }
   
@@ -172,13 +172,13 @@ export async function deleteSubject(subjectId: string) {
     .eq('id', subject.event_id)
     .single();
     
-  if (!event || event.owner_id !== session.user.id) {
+  if (!event || event.owner_id !== user.id) {
     // Also check if user is an admin for this event
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
       .eq('event_id', subject.event_id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
       
     if (!adminRole || adminRole.role === 'viewer') {
