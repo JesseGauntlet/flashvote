@@ -5,6 +5,8 @@ create extension if not exists "postgis";
 -- Create tables
 create table if not exists profiles (
     id uuid references auth.users on delete cascade primary key,
+    name text,
+    email text,
     is_premium boolean default false,
     metadata jsonb,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -40,6 +42,7 @@ create table if not exists locations (
     id uuid default uuid_generate_v4() primary key,
     event_id uuid references events on delete cascade not null,
     name text not null,
+    address text,
     city text,
     zip_code text,
     lat float,
@@ -258,3 +261,17 @@ create trigger update_locations_updated_at
     before update on locations
     for each row
     execute function update_updated_at_column();
+
+-- Auto-create profile on user registration
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, is_premium, email, metadata)
+  values (new.id, false, new.email, '{}');
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
