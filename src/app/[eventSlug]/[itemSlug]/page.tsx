@@ -10,19 +10,23 @@ import { ClientLocationSelector } from '@/components/location/ClientLocationSele
 import { Card, CardContent } from '@/components/ui/card';
 
 interface ItemPageProps {
-  params: {
+  params: Promise<{
     eventSlug: string;
     itemSlug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     location?: string;
-  };
+  }>;
 }
 
 export default async function ItemPage({ params, searchParams }: ItemPageProps) {
-  // Destructure params and searchParams
-  const { eventSlug, itemSlug } = params;
-  const { location } = searchParams;
+  // First, await both params and searchParams to ensure they're fully resolved
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  
+  // Now it's safe to destructure
+  const { eventSlug, itemSlug } = resolvedParams;
+  const { location } = resolvedSearchParams;
   const locationId = location || null;
   
   const supabase = await createClient();

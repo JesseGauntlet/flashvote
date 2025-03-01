@@ -10,10 +10,10 @@ import { SubjectsList } from '../../SubjectsList';
 import { Toaster } from 'sonner';
 
 interface ItemPageProps {
-  params: {
+  params: Promise<{
     id: string;
     itemId: string;
-  };
+  }>;
 }
 
 export default async function ItemPage({ params }: ItemPageProps) {

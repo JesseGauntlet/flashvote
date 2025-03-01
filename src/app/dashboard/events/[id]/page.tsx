@@ -13,9 +13,9 @@ import { ItemsList } from './ItemsList';
 import { Toaster } from 'sonner';
 
 interface EventPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // Types are defined in ./types.d.ts and used by the imported components

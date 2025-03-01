@@ -7,12 +7,12 @@ import { ClientLocationSelector } from '@/components/location/ClientLocationSele
 import { PublicItemsList } from './PublicItemsList';
 
 interface EventPageProps {
-  params: {
+  params: Promise<{
     eventSlug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     location?: string;
-  };
+  }>;
 }
 
 export default async function EventPage({ params, searchParams }: EventPageProps) {
