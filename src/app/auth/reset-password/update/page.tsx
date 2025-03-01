@@ -25,7 +25,9 @@ export default function UpdatePasswordPage() {
         return
       }
 
-      const result = await updatePassword(password, password)
+      // For a reset password flow, we don't need to verify the old password
+      // Pass a placeholder value for the current password and the new one for the new password
+      const result = await updatePassword('', password)
       if (result?.error) {
         setError(result.error)
       }
