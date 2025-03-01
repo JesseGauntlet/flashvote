@@ -5,6 +5,16 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
+interface Event {
+  id: string;
+  title: string;
+  slug: string;
+  created_at: string;
+  is_premium?: boolean;
+  archived_at?: string | null;
+  role: string;
+}
+
 export default async function EventsPage() {
   const session = await requireSession();
   const supabase = await createClient();
@@ -23,15 +33,15 @@ export default async function EventsPage() {
     .eq('user_id', session.user.id);
   
   // Combine both lists
-  const allEvents = [
+  const allEvents: Event[] = [
     ...(events || []).map(event => ({
       ...event,
       role: 'owner',
     })),
     ...(adminEvents || [])
-      .filter(admin => admin.events) // Filter out any null events
+      .filter(admin => admin.events && admin.events.length > 0)
       .map(admin => ({
-        ...admin.events,
+        ...admin.events[0],
         role: admin.role,
       })),
   ];
@@ -60,7 +70,7 @@ export default async function EventsPage() {
           <div className="text-center p-12 border rounded-md">
             <h3 className="text-lg font-medium mb-2">No events found</h3>
             <p className="text-muted-foreground mb-6">
-              You haven't created any events yet or been added as an admin to any events.
+              You haven&apos;t created any events yet or been added as an admin to any events.
             </p>
             <Link href="/dashboard/events/new">
               <Button>

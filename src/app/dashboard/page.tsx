@@ -6,6 +6,18 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
+// Define a proper type for admin events based on the query result
+interface AdminEvent {
+  event_id: string;
+  role: string;
+  events: {
+    id: string;
+    title: string;
+    slug: string;
+    created_at: string;
+  }[];
+}
+
 export default async function DashboardPage() {
   const session = await requireSession();
   const supabase = await createClient();
@@ -51,7 +63,7 @@ export default async function DashboardPage() {
               
               {!error && events && events.length === 0 && (
                 <p className="text-muted-foreground">
-                  You haven't created any events yet. Click "New Event" to get started.
+                  You haven&apos;t created any events yet.
                 </p>
               )}
               
@@ -91,22 +103,24 @@ export default async function DashboardPage() {
               
               {!adminError && (!adminEvents || adminEvents.length === 0) && (
                 <p className="text-muted-foreground">
-                  You don't have admin access to any events created by others.
+                  You don&apos;t have admin access to any events created by others.
                 </p>
               )}
               
               {!adminError && adminEvents && adminEvents.length > 0 && (
                 <ul className="space-y-2">
-                  {adminEvents.map((admin) => {
-                    if (!admin.events) return null;
+                  {adminEvents.map((admin: AdminEvent) => {
+                    // Use the first event from the events array if available
+                    if (!admin.events || admin.events.length === 0) return null;
+                    const eventInfo = admin.events[0];
                     
                     return (
                       <li key={admin.event_id} className="border rounded-md p-3">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-medium">{admin.events.title}</h3>
+                            <h3 className="font-medium">{eventInfo.title}</h3>
                             <p className="text-sm text-muted-foreground">
-                              /{admin.events.slug} ({admin.role})
+                              /{eventInfo.slug} ({admin.role})
                             </p>
                           </div>
                           <Link href={`/dashboard/events/${admin.event_id}`}>

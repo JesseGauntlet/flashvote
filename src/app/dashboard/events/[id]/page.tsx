@@ -11,7 +11,6 @@ import { EventDetailsForm } from './EventDetailsForm';
 import { SubjectsList } from './SubjectsList';
 import { ItemsList } from './ItemsList';
 import { Toaster } from 'sonner';
-import { Database } from '@/types/supabase';
 
 interface EventPageProps {
   params: {
@@ -19,10 +18,7 @@ interface EventPageProps {
   };
 }
 
-// Define types for the data we're fetching
-type Event = Database['public']['Tables']['events']['Row'];
-type Subject = Database['public']['Tables']['subjects']['Row'];
-type Item = Database['public']['Tables']['items']['Row'];
+// Types are defined in ./types.d.ts and used by the imported components
 
 export default async function EventPage({ params }: EventPageProps) {
   // First, await the params object to ensure it's fully resolved
@@ -37,7 +33,7 @@ export default async function EventPage({ params }: EventPageProps) {
   // Fetch event details
   const { data: event, error } = await supabase
     .from('events')
-    .select('id, title, slug, owner_id, is_premium, archived_at, created_at')
+    .select('id, title, slug, owner_id, is_premium, archived_at, metadata, created_at, updated_at')
     .eq('id', id)
     .single();
   
@@ -63,7 +59,7 @@ export default async function EventPage({ params }: EventPageProps) {
   // Fetch subjects for this event (directly under the event, not under items)
   const { data: subjects } = await supabase
     .from('subjects')
-    .select('id, label, pos_label, neg_label')
+    .select('id, label, pos_label, neg_label, event_id, item_id, metadata, created_at')
     .eq('event_id', id)
     .is('item_id', null);
   

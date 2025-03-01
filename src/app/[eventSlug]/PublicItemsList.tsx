@@ -9,7 +9,8 @@ import { ArrowRight } from 'lucide-react';
 import { OptimizedSubject } from '@/components/vote/OptimizedSubject';
 import { VotesProvider } from '@/components/vote/VotesProvider';
 
-interface Item {
+// Export the interface so it's considered used by TypeScript
+export interface Item {
   id: string;
   name: string;
   item_slug: string;
@@ -114,7 +115,7 @@ export function PublicItemsList({
         {filteredItems.length > 0 && (
           <div className="space-y-6">
             {filteredItems.map((item) => {
-              const { defaultSubject, regularSubjects } = itemSubjectsByItemId[item.id] || 
+              const { defaultSubject } = itemSubjectsByItemId[item.id] || 
                 { defaultSubject: undefined, regularSubjects: [] };
               
               return (

@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Subject } from '@/components/vote/Subject';
-import { LocationSelector } from '@/components/location/LocationSelector';
 import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 import Link from 'next/link';
@@ -21,13 +20,9 @@ interface ItemPageProps {
 }
 
 export default async function ItemPage({ params, searchParams }: ItemPageProps) {
-  // First, await both params and searchParams to ensure they're fully resolved
-  const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
-  
-  // Now it's safe to destructure them
-  const { eventSlug, itemSlug } = resolvedParams;
-  const { location } = resolvedSearchParams;
+  // Destructure params and searchParams
+  const { eventSlug, itemSlug } = params;
+  const { location } = searchParams;
   const locationId = location || null;
   
   const supabase = await createClient();

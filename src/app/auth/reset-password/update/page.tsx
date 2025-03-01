@@ -25,11 +25,11 @@ export default function UpdatePasswordPage() {
         return
       }
 
-      const result = await updatePassword(formData)
+      const result = await updatePassword(password, password)
       if (result?.error) {
         setError(result.error)
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)

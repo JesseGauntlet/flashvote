@@ -15,7 +15,7 @@ export async function getSession() {
       user,
       // Add any other session properties you need
     }
-  } catch (error) {
+  } catch {
     return null
   }
 }

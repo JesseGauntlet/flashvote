@@ -74,7 +74,7 @@ export default async function LocationsPage() {
           <div className="text-center p-12 border rounded-md">
             <h3 className="text-lg font-medium mb-2">No locations found</h3>
             <p className="text-muted-foreground mb-6">
-              You haven't created any locations yet. Locations allow you to track votes by specific places.
+              You haven&apos;t created any locations yet. Locations allow you to track votes by specific places.
             </p>
             <Link href="/dashboard/locations/new">
               <Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 type VoteResults = {
@@ -28,7 +28,7 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchVotes = async () => {
+  const fetchVotes = useCallback(async () => {
     if (subjectIds.length === 0) {
       setVoteResults({});
       setIsLoading(false);
@@ -59,7 +59,7 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [subjectIds, locationId]);
 
   useEffect(() => {
     fetchVotes();
@@ -85,7 +85,7 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [subjectIds.join(','), locationId]);
+  }, [fetchVotes, subjectIds]);
 
   const value = {
     voteResults,

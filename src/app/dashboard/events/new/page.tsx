@@ -8,15 +8,13 @@ import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { createEvent } from '@/lib/events/actions';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function NewEventPage() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,9 +32,11 @@ export default function NewEventPage() {
     setIsSubmitting(true);
     
     try {
-      await createEvent({ title, slug });
+      await createEvent({
+        title: title.trim(),
+        slug: slug.trim(),
+      });
       toast.success('Event created successfully');
-      // The server action will handle the redirect
     } catch (error) {
       toast.error('Error creating event', {
         description: error instanceof Error ? error.message : 'An unexpected error occurred',

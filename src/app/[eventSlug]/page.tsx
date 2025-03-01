@@ -5,8 +5,6 @@ import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { ClientLocationSelector } from '@/components/location/ClientLocationSelector';
 import { PublicItemsList } from './PublicItemsList';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 
 interface EventPageProps {
   params: {
@@ -92,7 +90,22 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   
   // Group item subjects by item_id for easier rendering
   // Separate default subjects (empty label) from regular subjects
-  const itemSubjectsByItemId: Record<string, { defaultSubject?: any, regularSubjects: any[] }> = {};
+  const itemSubjectsByItemId: Record<string, { 
+    defaultSubject?: { 
+      id: string;
+      label: string;
+      pos_label: string;
+      neg_label: string;
+      locationId?: string;
+    }, 
+    regularSubjects: Array<{
+      id: string;
+      label: string;
+      pos_label: string;
+      neg_label: string;
+      locationId?: string;
+    }> 
+  }> = {};
   
   (itemSubjects || []).forEach((subject) => {
     if (!itemSubjectsByItemId[subject.item_id]) {

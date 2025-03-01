@@ -24,7 +24,7 @@ export default function SignUpPage() {
       } else if (result?.message) {
         setMessage(result.message)
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)

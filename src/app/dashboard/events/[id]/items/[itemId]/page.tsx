@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { SubjectsList } from '../../SubjectsList';
 import { Toaster } from 'sonner';
-import { Database } from '@/types/supabase';
 
 interface ItemPageProps {
   params: {
@@ -16,11 +15,6 @@ interface ItemPageProps {
     itemId: string;
   };
 }
-
-// Define types for the data we're fetching
-type Event = Database['public']['Tables']['events']['Row'];
-type Item = Database['public']['Tables']['items']['Row'];
-type Subject = Database['public']['Tables']['subjects']['Row'];
 
 export default async function ItemPage({ params }: ItemPageProps) {
   // First, await the params object to ensure it's fully resolved

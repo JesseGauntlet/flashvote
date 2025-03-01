@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 
 export async function signIn(formData: FormData) {
   const email = formData.get('email') as string
