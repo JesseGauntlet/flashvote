@@ -4,6 +4,7 @@ import { Subject } from '@/components/vote/Subject';
 import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { ClientLocationSelector } from '@/components/location/ClientLocationSelector';
+import { PublicItemsList } from './PublicItemsList';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -160,50 +161,17 @@ export default async function EventPage({ params, searchParams }: EventPageProps
           </div>
         )}
         
-        {/* Items with their subjects */}
-        {items && items.length > 0 && (
-          <div className="space-y-6">
-            {items.map((item) => {
-              const { defaultSubject, regularSubjects } = itemSubjectsByItemId[item.id] || 
-                { defaultSubject: undefined, regularSubjects: [] };
-              
-              return (
-                <div 
-                  key={item.id} 
-                  className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200"
-                >
-                  <div className="p-4 bg-muted/30">
-                    <div className="flex justify-between items-center mb-2">
-                      <Link 
-                        href={`/${eventSlug}/${item.item_slug}`}
-                        className="text-lg font-semibold hover:underline flex items-center gap-1"
-                      >
-                        {item.name}
-                        <ArrowRight className="h-4 w-4 opacity-50" />
-                      </Link>
-                    </div>
-                    
-                    {/* Default subject (implicit rating) */}
-                    {defaultSubject && (
-                      <div className="p-1">
-                        <Subject
-                          key={defaultSubject.id}
-                          id={defaultSubject.id}
-                          label=""
-                          posLabel={defaultSubject.pos_label}
-                          negLabel={defaultSubject.neg_label}
-                          locationId={locationId || undefined}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {/* Items with their subjects - now using PublicItemsList component */}
+        {items && (
+          <PublicItemsList
+            items={items}
+            eventSlug={eventSlug}
+            itemSubjectsByItemId={itemSubjectsByItemId}
+            locationId={locationId}
+          />
         )}
         
-        {/* No items message */}
+        {/* Show "No content" only if both event subjects and items are empty */}
         {(!items || items.length === 0) && (!eventSubjects || eventSubjects.length === 0) && (
           <div className="text-center p-12 border rounded-md">
             <h3 className="text-lg font-medium mb-2">No content found</h3>

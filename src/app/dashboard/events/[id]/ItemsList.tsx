@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Pencil, Trash2, Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Upload, AlertCircle, CheckCircle2, Search } from 'lucide-react';
 import { createItem, updateItem, deleteItem, bulkCreateItems, CsvItemData } from '@/lib/events/item-actions';
 import { parseCSV } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -47,6 +47,7 @@ interface ItemsListProps {
 
 export function ItemsList({ eventId, items }: ItemsListProps) {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkUploadDialogOpen, setBulkUploadDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
@@ -238,6 +239,17 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
       setIsUploading(false);
     }
   };
+
+  // Filter items based on search query
+  const filteredItems = items.filter((item) => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(query) ||
+      item.item_slug.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -519,6 +531,22 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
         </div>
       </div>
       
+      {/* Add search input */}
+      {items.length > 0 && (
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Search className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <Input
+            type="search"
+            placeholder="Search items..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      )}
+      
       {items.length === 0 ? (
         <div className="text-center p-8 border rounded-md">
           <h4 className="text-lg font-medium mb-2">No items yet</h4>
@@ -530,9 +558,19 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
             Add Item
           </Button>
         </div>
+      ) : filteredItems.length === 0 ? (
+        <div className="text-center p-8 border rounded-md">
+          <h4 className="text-lg font-medium mb-2">No matching items</h4>
+          <p className="text-muted-foreground mb-4">
+            Try a different search term.
+          </p>
+          <Button variant="outline" onClick={() => setSearchQuery('')}>
+            Clear Search
+          </Button>
+        </div>
       ) : (
         <div className="space-y-4">
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <div key={item.id} className="flex justify-between items-center p-4 border rounded-md">
               <div>
                 <h4 className="font-medium">{item.name}</h4>
