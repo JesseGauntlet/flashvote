@@ -6,26 +6,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Plus, Edit, ArrowRightFromLine } from 'lucide-react';
 import { EventDetailsForm } from './EventDetailsForm';
 import { SubjectsList } from './SubjectsList';
 import { ItemsList } from './ItemsList';
+import LocationsList from './LocationsList';
 import { Toaster } from 'sonner';
 
 interface EventPageProps {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    tab?: string;
+  }>;
 }
 
 // Types are defined in ./types.d.ts and used by the imported components
 
-export default async function EventPage({ params }: EventPageProps) {
+export default async function EventPage({ params, searchParams }: EventPageProps) {
   // First, await the params object to ensure it's fully resolved
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   
   // Now it's safe to destructure
   const { id } = resolvedParams;
+  const tabParam = resolvedSearchParams?.tab || 'event';
   
   const session = await requireSession();
   const supabase = await createClient();
@@ -56,18 +62,26 @@ export default async function EventPage({ params }: EventPageProps) {
     }
   }
   
-  // Fetch subjects for this event (directly under the event, not under items)
+  // Fetch subjects for this event
   const { data: subjects } = await supabase
     .from('subjects')
-    .select('id, label, pos_label, neg_label, event_id, item_id, metadata, created_at')
+    .select('*')
     .eq('event_id', id)
-    .is('item_id', null);
+    .order('name');
   
-  // Fetch items for this event with all required fields
+  // Fetch items for this event
   const { data: items } = await supabase
     .from('items')
-    .select('id, name, item_slug, event_id, item_id, image_url, metadata, created_at, updated_at')
-    .eq('event_id', id);
+    .select('*')
+    .eq('event_id', id)
+    .order('name');
+  
+  // Fetch locations for this event
+  const { data: locations } = await supabase
+    .from('locations')
+    .select('*')
+    .eq('event_id', id)
+    .order('name');
   
   return (
     <DashboardLayout>
@@ -92,14 +106,15 @@ export default async function EventPage({ params }: EventPageProps) {
           </Link>
         </div>
         
-        <Tabs defaultValue="details">
-          <TabsList className="mb-4">
-            <TabsTrigger value="details">Event Details</TabsTrigger>
+        <Tabs defaultValue={tabParam} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="event">Event Details</TabsTrigger>
             <TabsTrigger value="subjects">Subjects</TabsTrigger>
             <TabsTrigger value="items">Items</TabsTrigger>
+            <TabsTrigger value="locations">Locations</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="details">
+          <TabsContent value="event">
             <Card>
               <CardHeader>
                 <CardTitle>Event Details</CardTitle>
@@ -137,6 +152,20 @@ export default async function EventPage({ params }: EventPageProps) {
               </CardHeader>
               <CardContent>
                 <ItemsList eventId={event.id} items={items || []} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="locations">
+            <Card>
+              <CardHeader>
+                <CardTitle>Locations</CardTitle>
+                <CardDescription>
+                  Manage voting locations for this event
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LocationsList eventId={id} locations={locations || []} />
               </CardContent>
             </Card>
           </TabsContent>
