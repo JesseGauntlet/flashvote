@@ -34,21 +34,37 @@ export function VoteResults({
       try {
         const supabase = createClient();
         
-        // Query for positive votes
-        const { data: posData, error: posError } = await supabase
+        // Query builder for positive votes
+        let posQuery = supabase
           .from('votes')
           .select('id')
           .eq('subject_id', subjectId)
           .eq('choice', true);
           
+        // Add location filter if provided
+        if (locationId) {
+          posQuery = posQuery.eq('location_id', locationId);
+        }
+        
+        // Execute positive votes query
+        const { data: posData, error: posError } = await posQuery;
+        
         if (posError) throw new Error(posError.message);
         
-        // Query for negative votes
-        const { data: negData, error: negError } = await supabase
+        // Query builder for negative votes
+        let negQuery = supabase
           .from('votes')
           .select('id')
           .eq('subject_id', subjectId)
           .eq('choice', false);
+          
+        // Add location filter if provided
+        if (locationId) {
+          negQuery = negQuery.eq('location_id', locationId);
+        }
+        
+        // Execute negative votes query
+        const { data: negData, error: negError } = await negQuery;
           
         if (negError) throw new Error(negError.message);
         
@@ -66,6 +82,13 @@ export function VoteResults({
     
     // Set up real-time subscription for votes
     const supabase = createClient();
+    
+    // Build filter for real-time subscription
+    let filter = `subject_id=eq.${subjectId}`;
+    if (locationId) {
+      filter += ` AND location_id=eq.${locationId}`;
+    }
+    
     const channel = supabase
       .channel('votes-changes')
       .on(
@@ -74,7 +97,7 @@ export function VoteResults({
           event: '*',
           schema: 'public',
           table: 'votes',
-          filter: `subject_id=eq.${subjectId}`,
+          filter: filter,
         },
         () => {
           fetchVotes();

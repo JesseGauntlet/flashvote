@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Subject } from '@/components/vote/Subject';
-import { Suspense } from 'react';
-import { Toaster } from 'sonner';
 import { ClientLocationSelector } from '@/components/location/ClientLocationSelector';
 import { PublicItemsList } from './PublicItemsList';
 
@@ -124,23 +122,18 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   });
   
   return (
-    <div className="container mx-auto px-4 py-12">
-      <Toaster position="top-center" />
-      
-      <div className="max-w-2xl mx-auto">
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold mb-6">{event.title}</h1>
         
-        <div className="mb-8">
-          <Suspense fallback={<div className="h-10 w-[200px] animate-pulse bg-muted rounded-md"></div>}>
-            <ClientLocationSelector eventId={event.id} initialLocationId={locationId} />
-          </Suspense>
-        </div>
+        <ClientLocationSelector eventId={event.id} initialLocationId={locationId} />
         
         {/* Event-level subjects */}
-        {eventSubjects && eventSubjects.length > 0 ? (
-          <div className="space-y-8 mb-12">
-            <h2 className="text-xl font-semibold">Event Questions</h2>
-            {eventSubjects.map((subject) => (
+        {eventSubjects && eventSubjects.length > 0 && (
+          <div className="space-y-4 mb-8">
+            <h2 className="text-xl font-medium mb-4">Event Questions</h2>
+            
+            {eventSubjects.map(subject => (
               <Subject
                 key={subject.id}
                 id={subject.id}
@@ -151,30 +144,9 @@ export default async function EventPage({ params, searchParams }: EventPageProps
               />
             ))}
           </div>
-        ) : (
-          <div className="text-center p-8 border rounded-md mb-12">
-            <h3 className="text-lg font-medium mb-2">No event questions</h3>
-            <p className="text-muted-foreground">
-              There are no voting subjects available for this event yet.
-            </p>
-          </div>
         )}
         
-        {/* Divider */}
-        {items && items.length > 0 && (
-          <div className="relative my-12">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-background px-4 text-sm text-muted-foreground">
-                Items
-              </span>
-            </div>
-          </div>
-        )}
-        
-        {/* Items with their subjects - now using PublicItemsList component */}
+        {/* Item list with their subjects */}
         {items && (
           <PublicItemsList
             items={items}

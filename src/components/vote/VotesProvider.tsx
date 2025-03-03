@@ -66,6 +66,13 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
     
     // Set up real-time updates for votes table changes
     const supabase = createClient();
+    
+    // Build filter for real-time subscription
+    let filter = `subject_id=in.(${subjectIds.join(',')})`;
+    if (locationId) {
+      filter += ` AND location_id=eq.${locationId}`;
+    }
+    
     const channel = supabase
       .channel('votes-changes-batch')
       .on(
@@ -74,7 +81,7 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
           event: '*',
           schema: 'public',
           table: 'votes',
-          filter: `subject_id=in.(${subjectIds.join(',')})`,
+          filter: filter,
         },
         () => {
           fetchVotes();
@@ -85,7 +92,7 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchVotes, subjectIds]);
+  }, [fetchVotes, subjectIds, locationId]);
 
   const value = {
     voteResults,
