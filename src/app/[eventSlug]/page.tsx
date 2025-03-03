@@ -131,7 +131,6 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         {/* Event-level subjects */}
         {eventSubjects && eventSubjects.length > 0 && (
           <div className="space-y-4 mb-8">
-            <h2 className="text-xl font-medium mb-4">Event Questions</h2>
             
             {eventSubjects.map(subject => (
               <Subject

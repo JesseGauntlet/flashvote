@@ -65,11 +65,15 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
   // Form state
   const [name, setName] = useState('');
   const [itemSlug, setItemSlug] = useState('');
+  const [itemId, setItemId] = useState('');
+  const [category, setCategory] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   
   const resetForm = () => {
     setName('');
     setItemSlug('');
+    setItemId('');
+    setCategory('');
     setImageUrl('');
     setEditingItem(null);
   };
@@ -78,6 +82,8 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
     setEditingItem(item);
     setName(item.name);
     setItemSlug(item.item_slug);
+    setItemId(item.item_id || '');
+    setCategory(item.category || '');
     setImageUrl(item.image_url || '');
   };
   
@@ -102,6 +108,8 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
         await updateItem(editingItem.id, {
           name,
           item_slug: itemSlug,
+          item_id: itemId || undefined,
+          category: category || undefined,
           image_url: imageUrl || undefined,
         });
         toast.success('Item updated successfully');
@@ -111,6 +119,8 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
           event_id: eventId,
           name,
           item_slug: itemSlug,
+          item_id: itemId || undefined,
+          category: category || undefined,
           image_url: imageUrl || undefined,
         });
         toast.success('Item created successfully');
@@ -452,6 +462,28 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
                 </div>
                 
                 <div className="space-y-2">
+                  <Label htmlFor="itemId">Item ID (Optional)</Label>
+                  <Input
+                    id="itemId"
+                    placeholder="External system ID"
+                    value={itemId}
+                    onChange={(e) => setItemId(e.target.value)}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category (Optional)</Label>
+                  <Input
+                    id="category"
+                    placeholder="e.g., Produce"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                
+                <div className="space-y-2">
                   <Label htmlFor="imageUrl">Image URL (Optional)</Label>
                   <Input
                     id="imageUrl"
@@ -505,6 +537,26 @@ export function ItemsList({ eventId, items }: ItemsListProps) {
                   <p className="text-sm text-muted-foreground">
                     Changing the slug will break existing links to this item.
                   </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-itemId">Item ID (Optional)</Label>
+                  <Input
+                    id="edit-itemId"
+                    value={itemId}
+                    onChange={(e) => setItemId(e.target.value)}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-category">Category (Optional)</Label>
+                  <Input
+                    id="edit-category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    disabled={isSubmitting}
+                  />
                 </div>
                 
                 <div className="space-y-2">

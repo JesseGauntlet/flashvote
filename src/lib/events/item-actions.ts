@@ -9,6 +9,7 @@ export interface CreateItemData {
   item_slug: string;
   name: string;
   item_id?: string;
+  category?: string;
   image_url?: string;
 }
 
@@ -73,6 +74,7 @@ export async function createItem(data: CreateItemData) {
       item_slug: data.item_slug,
       name: data.name,
       item_id: data.item_id || null,
+      category: data.category || null,
       image_url: data.image_url || null,
     })
     .select()
@@ -262,6 +264,7 @@ export interface CsvItemData {
   item_slug: string;
   name: string;
   item_id?: string;
+  category?: string;
 }
 
 export interface BulkCreateItemsResult {

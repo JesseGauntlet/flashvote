@@ -9,6 +9,32 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      admins: {
+        Row: {
+          id: string
+          event_id: string
+          user_id: string
+          role: string
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          user_id: string
+          role: string
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          user_id?: string
+          role?: string
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
       events: {
         Row: {
           id: string
@@ -51,6 +77,7 @@ export interface Database {
           item_slug: string
           name: string
           item_id: string | null
+          category: string | null
           image_url: string | null
           metadata: Json | null
           created_at: string
@@ -62,6 +89,7 @@ export interface Database {
           item_slug: string
           name: string
           item_id?: string | null
+          category?: string | null
           image_url?: string | null
           metadata?: Json | null
           created_at?: string
@@ -73,6 +101,7 @@ export interface Database {
           item_slug?: string
           name?: string
           item_id?: string | null
+          category?: string | null
           image_url?: string | null
           metadata?: Json | null
           created_at?: string
@@ -84,34 +113,69 @@ export interface Database {
           id: string
           event_id: string
           name: string
+          address: string | null
           city: string | null
           zip_code: string | null
           lat: number | null
           lon: number | null
           metadata: Json | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           event_id: string
           name: string
+          address?: string | null
           city?: string | null
           zip_code?: string | null
           lat?: number | null
           lon?: number | null
           metadata?: Json | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           event_id?: string
           name?: string
+          address?: string | null
           city?: string | null
           zip_code?: string | null
           lat?: number | null
           lon?: number | null
           metadata?: Json | null
           created_at?: string
+          updated_at?: string
+        }
+      }
+      profiles: {
+        Row: {
+          id: string
+          name: string | null
+          email: string | null
+          is_premium: boolean
+          metadata: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name?: string | null
+          email?: string | null
+          is_premium?: boolean
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string | null
+          email?: string | null
+          is_premium?: boolean
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
         }
       }
       subjects: {
@@ -184,55 +248,6 @@ export interface Database {
           created_at?: string
         }
       }
-      admins: {
-        Row: {
-          id: string
-          event_id: string
-          user_id: string
-          role: string
-          metadata: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          event_id: string
-          user_id: string
-          role: string
-          metadata?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          event_id?: string
-          user_id?: string
-          role?: string
-          metadata?: Json | null
-          created_at?: string
-        }
-      }
-      profiles: {
-        Row: {
-          id: string
-          is_premium: boolean
-          metadata: Json | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id: string
-          is_premium?: boolean
-          metadata?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          is_premium?: boolean
-          metadata?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
     }
     Views: {
       [_ in never]: never
@@ -244,4 +259,4 @@ export interface Database {
       [_ in never]: never
     }
   }
-} 
+}

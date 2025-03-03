@@ -31,6 +31,7 @@ create table if not exists items (
     item_slug text not null,
     name text not null,
     item_id text,
+    category text,
     image_url text,
     metadata jsonb,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
