@@ -89,7 +89,7 @@ export async function bulkCreateLocations({
       }
 
       // Insert the validated location
-      const { data: insertedLocation, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('locations')
         .insert({
           ...validatedLocation,

@@ -16,7 +16,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navItems = [
     { href: '/dashboard', label: 'Overview' },
     { href: '/dashboard/events', label: 'Events' },
-    { href: '/dashboard/locations', label: 'Locations' },
     { href: '/dashboard/settings', label: 'Settings' },
   ];
 

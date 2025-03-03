@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MapPin } from 'lucide-react';
 import { BulkLocationUpload } from './BulkLocationUpload';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 type EventInfo = {
   title: string;
@@ -24,7 +23,6 @@ type LocationWithEvent = {
 };
 
 export default function LocationsPage() {
-  const router = useRouter();
   const [locations, setLocations] = useState<LocationWithEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

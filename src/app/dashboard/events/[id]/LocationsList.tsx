@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Upload, Pencil, Trash2 } from 'lucide-react';
@@ -24,7 +24,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 export type LocationWithEvent = {
   id: string;
@@ -50,7 +49,6 @@ export default function LocationsList({ eventId, locations = [] }: LocationsList
   const [locationsList, setLocationsList] = useState<LocationWithEvent[]>(locations);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<LocationWithEvent | null>(null);
-  const router = useRouter();
   const supabase = createClient();
 
   // Filter locations based on search query
@@ -226,7 +224,7 @@ export default function LocationsList({ eventId, locations = [] }: LocationsList
           <DialogHeader>
             <DialogTitle>Delete Location</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{locationToDelete?.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{locationToDelete?.name}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -50,8 +50,6 @@ export default function BulkLocationUpload({
   onOpenChange, 
   onSuccess 
 }: BulkLocationUploadProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const [fileName, setFileName] = useState('');
   const [fileContents, setFileContents] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,8 +61,6 @@ export default function BulkLocationUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
-    setFile(null);
-    setFileName('');
     setFileContents('');
     setError(null);
     setUploadResults(null);
@@ -77,7 +73,7 @@ export default function BulkLocationUpload({
   };
 
   // Validate a single location
-  const validateLocation = (location: Record<string, string>, index: number): LocationPreview => {
+  const validateLocation = (location: Record<string, string>): LocationPreview => {
     const errors: string[] = [];
     const name = location.locationName || location.name || '';
     
@@ -86,8 +82,8 @@ export default function BulkLocationUpload({
     }
     
     // Optional validation for lat/lon if provided
-    let lat = location.lat || null;
-    let lon = location.lon || null;
+    const lat = location.lat || null;
+    const lon = location.lon || null;
     
     if (lat && isNaN(parseFloat(lat))) {
       errors.push('Latitude must be a valid number');
@@ -130,8 +126,8 @@ export default function BulkLocationUpload({
       }
       
       // Validate each row
-      const validatedLocations = parsedData.data.map((row, index) => 
-        validateLocation(row, index)
+      const validatedLocations = parsedData.data.map((row) => 
+        validateLocation(row)
       );
       
       // Collect all validation errors
@@ -156,8 +152,6 @@ export default function BulkLocationUpload({
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    setFile(selectedFile);
-    setFileName(selectedFile.name);
     setError(null);
     setUploadResults(null);
     setPreviewData([]);

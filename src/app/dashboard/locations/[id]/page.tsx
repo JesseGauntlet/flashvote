@@ -62,16 +62,6 @@ type Event = {
   slug: string;
 };
 
-// Define a type for the admin events data structure
-type AdminEvent = {
-  event_id: string;
-  events: {
-    id: string;
-    title: string;
-    slug: string;
-  };
-};
-
 type Location = {
   id: string;
   name: string;

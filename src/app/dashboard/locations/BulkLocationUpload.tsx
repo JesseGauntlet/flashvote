@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { Upload, AlertTriangle, CheckCircle2, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +31,15 @@ interface Event {
   title: string;
 }
 
+interface DetailedError {
+  row: number;
+  error: string;
+  location: {
+    name: string;
+    [key: string]: string | null | number;
+  };
+}
+
 export function BulkLocationUpload() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +50,7 @@ export function BulkLocationUpload() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileContents, setFileContents] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [detailedErrors, setDetailedErrors] = useState<any[]>([]);
+  const [detailedErrors, setDetailedErrors] = useState<DetailedError[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [isErrorExpanded, setIsErrorExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);

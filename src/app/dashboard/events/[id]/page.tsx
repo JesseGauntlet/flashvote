@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Plus, Edit, ArrowRightFromLine } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { EventDetailsForm } from './EventDetailsForm';
 import { SubjectsList } from './SubjectsList';
 import { ItemsList } from './ItemsList';
