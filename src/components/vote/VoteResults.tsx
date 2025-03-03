@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Progress } from '@/components/ui/progress';
+import { useLocation } from '@/components/location/LocationContext';
 
 export interface VoteResultsProps {
   subjectId: string;
@@ -21,6 +22,10 @@ export function VoteResults({
   simplified = false,
   ultraCompact = false
 }: VoteResultsProps) {
+  // Use the context location as a fallback when the prop isn't provided
+  const { selectedLocation } = useLocation();
+  const effectiveLocationId = locationId || (selectedLocation?.id);
+  
   const [posCount, setPosCount] = useState(0);
   const [negCount, setNegCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,8 +47,8 @@ export function VoteResults({
           .eq('choice', true);
           
         // Add location filter if provided
-        if (locationId) {
-          posQuery = posQuery.eq('location_id', locationId);
+        if (effectiveLocationId) {
+          posQuery = posQuery.eq('location_id', effectiveLocationId);
         }
         
         // Execute positive votes query
@@ -59,8 +64,8 @@ export function VoteResults({
           .eq('choice', false);
           
         // Add location filter if provided
-        if (locationId) {
-          negQuery = negQuery.eq('location_id', locationId);
+        if (effectiveLocationId) {
+          negQuery = negQuery.eq('location_id', effectiveLocationId);
         }
         
         // Execute negative votes query
@@ -85,8 +90,8 @@ export function VoteResults({
     
     // Build filter for real-time subscription
     let filter = `subject_id=eq.${subjectId}`;
-    if (locationId) {
-      filter += ` AND location_id=eq.${locationId}`;
+    if (effectiveLocationId) {
+      filter += ` AND location_id=eq.${effectiveLocationId}`;
     }
     
     const channel = supabase
@@ -108,7 +113,7 @@ export function VoteResults({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [subjectId, locationId]);
+  }, [subjectId, effectiveLocationId]);
 
   const totalVotes = posCount + negCount;
   const posPercentage = totalVotes > 0 ? Math.round((posCount / totalVotes) * 100) : 50;

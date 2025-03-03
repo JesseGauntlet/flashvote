@@ -126,7 +126,7 @@ export function PublicItemsList({
                   <div className="p-4 bg-muted/30">
                     <div className="flex justify-between items-center mb-2">
                       <Link 
-                        href={`/${eventSlug}/${item.item_slug}`}
+                        href={`/${eventSlug}/${item.item_slug}${locationId ? `?location=${locationId}` : ''}`}
                         className="text-lg font-semibold hover:underline flex items-center gap-1"
                       >
                         {item.name}

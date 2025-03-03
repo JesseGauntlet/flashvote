@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { useLocation } from '@/components/location/LocationContext';
 
 export interface VoteButtonProps {
   subjectId: string;
@@ -30,6 +31,10 @@ export function VoteButton({
   size = 'default',
   onClick
 }: VoteButtonProps) {
+  // Use the context location as a fallback when the prop isn't provided
+  const { selectedLocation } = useLocation();
+  const effectiveLocationId = locationId || (selectedLocation?.id);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
 
@@ -43,7 +48,7 @@ export function VoteButton({
         },
         body: JSON.stringify({
           subject_id: subjectId,
-          location_id: locationId,
+          location_id: effectiveLocationId,
           choice,
         }),
       });
