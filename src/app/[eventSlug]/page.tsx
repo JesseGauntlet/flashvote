@@ -63,7 +63,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   // Fetch items for this event
   const { data: items, error: itemsError } = await supabase
     .from('items')
-    .select('id, name, item_slug')
+    .select('id, name, item_slug, category')
     .eq('event_id', event.id);
   
   // Fetch subjects for all items under this event

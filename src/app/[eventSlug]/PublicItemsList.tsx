@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
@@ -8,12 +8,14 @@ import { ArrowRight } from 'lucide-react';
 // import { Subject } from '@/components/vote/Subject';
 import { OptimizedSubject } from '@/components/vote/OptimizedSubject';
 import { VotesProvider } from '@/components/vote/VotesProvider';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Export the interface so it's considered used by TypeScript
 export interface Item {
   id: string;
   name: string;
   item_slug: string;
+  category?: string;
 }
 
 interface SubjectData {
@@ -41,34 +43,70 @@ export function PublicItemsList({
   locationId 
 }: PublicItemsListProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
   
-  // Filter items based on search query
-  const filteredItems = items.filter((item) => {
-    if (!searchQuery.trim()) return true;
+  // Get unique categories from items
+  const uniqueCategories = ['All', ...new Set(items
+    .map(item => item.category)
+    .filter(Boolean) as string[])];
+  
+  // Memoize the subject IDs array so it maintains referential equality
+  const allSubjectIds = useMemo(() => {
+    const ids: string[] = [];
     
-    const query = searchQuery.toLowerCase();
-    return (
-      item.name.toLowerCase().includes(query) ||
-      item.item_slug.toLowerCase().includes(query)
-    );
-  });
-
-  // Collect all subject IDs for batch fetching
-  const allSubjectIds: string[] = [];
-  
-  // Gather all subject IDs from all items 
-  Object.values(itemSubjectsByItemId).forEach(({ defaultSubject, regularSubjects }) => {
-    if (defaultSubject) {
-      allSubjectIds.push(defaultSubject.id);
-    }
-    regularSubjects.forEach(subject => {
-      allSubjectIds.push(subject.id);
+    // Gather all subject IDs from all items 
+    Object.values(itemSubjectsByItemId).forEach(({ defaultSubject, regularSubjects }) => {
+      if (defaultSubject) {
+        ids.push(defaultSubject.id);
+      }
+      regularSubjects.forEach(subject => {
+        ids.push(subject.id);
+      });
     });
+    
+    return ids;
+  }, [itemSubjectsByItemId]); // Only recompute if itemSubjectsByItemId changes
+
+  // Filter items based on search query and active category
+  const filteredItems = items.filter((item) => {
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      if (!item.name.toLowerCase().includes(query) && 
+          !item.item_slug.toLowerCase().includes(query)) {
+        return false;
+      }
+    }
+    
+    // Category filter
+    if (activeCategory !== 'All') {
+      return item.category === activeCategory;
+    }
+    
+    return true;
   });
 
+  // Wrap the entire component with VotesProvider to fetch ALL votes once
   return (
     <VotesProvider subjectIds={allSubjectIds} locationId={locationId || undefined}>
       <div className="space-y-6">
+        {/* Category tabs - only show if there are items with categories */}
+        {items.length > 0 && uniqueCategories.length > 1 && (
+          <Tabs defaultValue="All" value={activeCategory} onValueChange={setActiveCategory}>
+            <TabsList className="mb-4 flex flex-wrap h-auto">
+              {uniqueCategories.map((category) => (
+                <TabsTrigger 
+                  key={category} 
+                  value={category}
+                  className="mb-1"
+                >
+                  {category}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        )}
+        
         {/* Search input - only show if there are items */}
         {items.length > 0 && (
           <div className="relative">
