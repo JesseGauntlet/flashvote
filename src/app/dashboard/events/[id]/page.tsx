@@ -1,6 +1,6 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { createClient } from '@/lib/supabase/server';
-import { requireSession } from '@/lib/auth/session';
+import { requireSession, getCreatorStatus } from '@/lib/auth/session';
 import { notFound } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,33 +14,26 @@ import LocationsList from './LocationsList';
 import { Toaster } from 'sonner';
 
 interface EventPageProps {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
-  searchParams: Promise<{
+  };
+  searchParams: {
     tab?: string;
-  }>;
+  };
 }
 
 // Types are defined in ./types.d.ts and used by the imported components
 
 export default async function EventPage({ params, searchParams }: EventPageProps) {
-  // First, await the params object to ensure it's fully resolved
-  const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
-  
-  // Now it's safe to destructure
-  const { id } = resolvedParams;
-  const tabParam = resolvedSearchParams?.tab || 'event';
-  
   const session = await requireSession();
+  const isCreator = await getCreatorStatus();
   const supabase = await createClient();
   
   // Fetch event details
   const { data: event, error } = await supabase
     .from('events')
     .select('id, title, slug, owner_id, is_premium, archived_at, metadata, created_at, updated_at')
-    .eq('id', id)
+    .eq('id', params.id)
     .single();
   
   if (error || !event) {
@@ -53,7 +46,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
-      .eq('event_id', id)
+      .eq('event_id', params.id)
       .eq('user_id', session.user.id)
       .single();
       
@@ -66,25 +59,25 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const { data: subjects } = await supabase
     .from('subjects')
     .select('*')
-    .eq('event_id', id)
+    .eq('event_id', params.id)
     .order('name');
   
   // Fetch items for this event
   const { data: items } = await supabase
     .from('items')
     .select('*')
-    .eq('event_id', id)
+    .eq('event_id', params.id)
     .order('name');
   
   // Fetch locations for this event
   const { data: locations } = await supabase
     .from('locations')
     .select('*')
-    .eq('event_id', id)
+    .eq('event_id', params.id)
     .order('name');
   
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
       <Toaster position="top-center" />
       
       <div className="space-y-6">
@@ -106,7 +99,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
           </Link>
         </div>
         
-        <Tabs defaultValue={tabParam} className="space-y-4">
+        <Tabs defaultValue={searchParams.tab || 'event'} className="space-y-4">
           <TabsList>
             <TabsTrigger value="event">Event Details</TabsTrigger>
             <TabsTrigger value="subjects">Subjects</TabsTrigger>
@@ -165,7 +158,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LocationsList eventId={id} locations={locations || []} />
+                <LocationsList eventId={params.id} locations={locations || []} />
               </CardContent>
             </Card>
           </TabsContent>

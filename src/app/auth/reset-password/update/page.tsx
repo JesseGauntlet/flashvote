@@ -6,13 +6,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
 
 export default function UpdatePasswordPage() {
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
   const [loading, setLoading] = useState(false)
-  const searchParams = useSearchParams()
 
   useEffect(() => {
     // Check if we have a hash fragment which indicates we came from a password reset email

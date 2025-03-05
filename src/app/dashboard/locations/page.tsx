@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MapPin } from 'lucide-react';
 import { BulkLocationUpload } from './BulkLocationUpload';
 import { useState, useEffect } from 'react';
+import { useProfile } from '@/lib/auth/hooks';
 
 type EventInfo = {
   title: string;
@@ -27,6 +28,7 @@ export default function LocationsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const { isCreator } = useProfile();
   
   useEffect(() => {
     const fetchLocations = async () => {
@@ -95,7 +97,7 @@ export default function LocationsPage() {
   }, [supabase]);
   
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Locations</h1>

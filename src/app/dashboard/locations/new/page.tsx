@@ -29,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { useProfile } from '@/lib/auth/hooks';
 
 // Define the form schema using Zod
 const formSchema = z.object({
@@ -56,6 +57,7 @@ export default function NewLocationPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
+  const { isCreator } = useProfile();
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -156,7 +158,7 @@ export default function NewLocationPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { createClient } from '@/lib/supabase/server';
-import { requireSession } from '@/lib/auth/session';
+import { requireSession, getCreatorStatus } from '@/lib/auth/session';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const { id, itemId } = resolvedParams;
   
   const session = await requireSession();
+  const isCreator = await getCreatorStatus();
   const supabase = await createClient();
   
   // Fetch event details
@@ -72,7 +73,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
     .eq('item_id', itemId);
   
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
       <Toaster position="top-center" />
       
       <div className="space-y-6">

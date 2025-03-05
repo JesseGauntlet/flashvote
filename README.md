@@ -63,6 +63,14 @@ A flexible, real-time voting and sentiment-tracking platform that allows quick c
 - `npm run lint` - Run ESLint
 - `npm run test` - Run tests (when implemented)
 
+## Notes
+Remove:
+  // Redirect root path to /costco
+  if (request.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/costco', request.url))
+  }
+from middleware.ts for a generalized homepage.
+
 ## Contributing
 
 This project is currently in development. Contribution guidelines will be added soon.

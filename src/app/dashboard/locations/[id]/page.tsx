@@ -41,6 +41,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useProfile } from '@/lib/auth/hooks';
 
 // Define the form schema using Zod
 const formSchema = z.object({
@@ -83,6 +84,7 @@ export default function EditLocationPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const supabase = createClient();
+  const { isCreator } = useProfile();
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -267,7 +269,7 @@ export default function EditLocationPage() {
 
   if (isLoading && !location) {
     return (
-      <DashboardLayout>
+      <DashboardLayout isCreator={isCreator}>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -286,7 +288,7 @@ export default function EditLocationPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -1,37 +1,62 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
+import { useAuth as useAuthContext } from './context'
 
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+export type Profile = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  is_premium: boolean;
+  creator: boolean;
+}
+
+// Re-export the useAuth hook from context
+export const useAuth = useAuthContext;
+
+export function useProfile() {
+  const { user, loading: userLoading } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
-    // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      setLoading(false)
-    })
+    async function fetchProfile() {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-    return () => {
-      subscription.unsubscribe()
+        if (error) {
+          setError(error.message);
+        } else {
+          setProfile(data as Profile);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred fetching profile');
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [supabase.auth])
+
+    if (!userLoading) {
+      fetchProfile();
+    }
+  }, [user, userLoading, supabase]);
 
   return {
-    user,
-    loading,
-    isAuthenticated: !!user,
-  }
+    profile,
+    loading: userLoading || loading,
+    error,
+    isCreator: profile?.creator || false,
+  };
 } 

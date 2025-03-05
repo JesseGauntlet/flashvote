@@ -3,6 +3,7 @@
 import { LocationProvider } from '@/components/location/LocationContext';
 import { Toaster } from 'sonner';
 import { useSearchParams } from 'next/navigation';
+import { MainLayout } from '@/components/layout/MainLayout';
 
 interface EventLayoutProps {
   children: React.ReactNode;
@@ -18,9 +19,11 @@ export default function EventLayout({
   const location = searchParams.get('location');
   
   return (
-    <LocationProvider initialLocationId={location}>
-      <Toaster position="top-center" />
-      {children}
-    </LocationProvider>
+    <MainLayout>
+      <LocationProvider initialLocationId={location}>
+        <Toaster position="top-center" />
+        {children}
+      </LocationProvider>
+    </MainLayout>
   );
 } 

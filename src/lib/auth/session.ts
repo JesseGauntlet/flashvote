@@ -36,4 +36,47 @@ export async function getUser() {
 export async function requireUser() {
   const session = await requireSession()
   return session.user
+}
+
+export async function requireCreator() {
+  const session = await requireSession();
+  const supabase = await createClient();
+  
+  // Fetch the user's profile to check creator status
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('creator')
+    .eq('id', session.user.id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching profile:', error);
+    redirect('/dashboard/settings');
+  }
+  
+  // Redirect if not a creator
+  if (!profile?.creator) {
+    redirect('/dashboard/settings');
+  }
+  
+  return session;
+}
+
+export async function getCreatorStatus() {
+  const session = await requireSession();
+  const supabase = await createClient();
+  
+  // Fetch the user's profile to check creator status
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('creator')
+    .eq('id', session.user.id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching profile:', error);
+    return false;
+  }
+  
+  return profile?.creator || false;
 } 

@@ -1,14 +1,14 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { requireSession } from '@/lib/auth/session';
+import { requireSession, getCreatorStatus } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProfileSettings } from './ProfileSettings';
 import { PasswordSettings } from './PasswordSettings';
 import { PremiumSettings } from './PremiumSettings';
-import { Toaster } from 'sonner';
 
 export default async function SettingsPage() {
   const session = await requireSession();
+  const isCreator = await getCreatorStatus();
   const supabase = await createClient();
   
   // Fetch the user's profile
@@ -23,9 +23,7 @@ export default async function SettingsPage() {
   }
   
   return (
-    <DashboardLayout>
-      <Toaster position="top-center" />
-      
+    <DashboardLayout isCreator={isCreator}>
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">Account Settings</h1>
         

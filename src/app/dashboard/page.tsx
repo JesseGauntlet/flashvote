@@ -1,10 +1,11 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { requireSession } from '@/lib/auth/session';
+import { requireSession, getCreatorStatus } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 // Define a proper type for admin events based on the query result
 interface AdminEvent {
@@ -19,7 +20,14 @@ interface AdminEvent {
 }
 
 export default async function DashboardPage() {
+  // Check if user is a creator, redirect if not
   const session = await requireSession();
+  const isCreator = await getCreatorStatus();
+  
+  if (!isCreator) {
+    redirect('/dashboard/settings');
+  }
+  
   const supabase = await createClient();
   
   // Fetch events owned by the user
@@ -36,7 +44,7 @@ export default async function DashboardPage() {
     .eq('user_id', session.user.id);
   
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Dashboard</h1>

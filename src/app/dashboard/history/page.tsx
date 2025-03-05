@@ -1,5 +1,5 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { requireSession } from '@/lib/auth/session';
+import { requireSession, getCreatorStatus } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import {
   Card,
@@ -47,6 +47,7 @@ interface PageProps {
 
 export default async function HistoryPage({ searchParams }: PageProps) {
   const session = await requireSession();
+  const isCreator = await getCreatorStatus();
   const supabase = await createClient();
   
   // Access searchParams asynchronously
@@ -114,7 +115,7 @@ export default async function HistoryPage({ searchParams }: PageProps) {
   }) as VoteHistoryItem[];
   
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">Vote History</h1>
         

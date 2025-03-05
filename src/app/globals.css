@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-
+/* Fix for scrollbar-related layout shifts */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
 
 @layer base {
   :root {

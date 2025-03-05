@@ -41,12 +41,17 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = ['/login', '/signup', '/auth/reset-password', '/auth/callback']
   const isPublicRoute = publicRoutes.some(path => request.nextUrl.pathname.startsWith(path))
   
-  // Special case for reset-password/update route - allow authenticated access for password reset
-  const isPasswordResetUpdate = request.nextUrl.pathname.startsWith('/auth/reset-password/update')
+  // Note: We previously had special handling for reset-password/update route,
+  // but it's now handled by the public routes check above
   
   // Define login/signup pages that should redirect to home if user is already signed in
   const authOnlyRoutes = ['/login', '/signup']
   const isAuthOnlyRoute = authOnlyRoutes.some(path => request.nextUrl.pathname.startsWith(path))
+
+  // Redirect root path to /costco
+  if (request.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/costco', request.url))
+  }
 
   // If the user is not signed in and the route is not public, redirect to login
   if (!user && !isPublicRoute) {

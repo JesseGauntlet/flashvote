@@ -7,14 +7,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { createEvent } from '@/lib/events/actions';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useProfile } from '@/lib/auth/hooks';
 
 export default function NewEventPage() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { isCreator } = useProfile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +41,7 @@ export default function NewEventPage() {
         slug: slug.trim(),
       });
       toast.success('Event created successfully');
+      router.push('/dashboard/events');
     } catch (error) {
       toast.error('Error creating event', {
         description: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -61,7 +66,8 @@ export default function NewEventPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isCreator={isCreator}>
+      <Toaster position="top-center" />
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Link href="/dashboard">
