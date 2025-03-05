@@ -101,9 +101,6 @@ export function ProfileSettings({ user, profile }: ProfileSettingsProps) {
       
       <div className="pt-4 text-sm text-muted-foreground">
         <p>
-          Account ID: {user.id}
-        </p>
-        <p>
           Created: {new Date(user.created_at || '').toLocaleDateString()}
         </p>
       </div>

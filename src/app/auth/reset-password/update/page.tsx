@@ -5,15 +5,28 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 export default function UpdatePasswordPage() {
   const [error, setError] = useState<string>('')
+  const [success, setSuccess] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // Check if we have a hash fragment which indicates we came from a password reset email
+    const hash = window.location.hash
+    if (hash && hash.startsWith('#access_token=')) {
+      // We came from a reset password email link - the user already has a session
+      console.log('Reset password token detected')
+    }
+  }, [])
 
   async function handleSubmit(formData: FormData) {
     try {
       setError('')
+      setSuccess('')
       setLoading(true)
 
       // Validate password match
@@ -30,8 +43,15 @@ export default function UpdatePasswordPage() {
       const result = await updatePassword('', password)
       if (result?.error) {
         setError(result.error)
+      } else if (result?.success) {
+        // Show success message and redirect after a short delay
+        setSuccess('Password updated successfully! Redirecting to login...')
+        setTimeout(() => {
+          window.location.href = '/login?message=Password+updated+successfully'
+        }, 2000)
       }
-    } catch {
+    } catch (e) {
+      console.error('Error updating password:', e)
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)
@@ -52,6 +72,11 @@ export default function UpdatePasswordPage() {
             {error && (
               <div className="bg-red-100 text-red-700 p-3 rounded-md text-sm">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-100 text-green-700 p-3 rounded-md text-sm">
+                {success}
               </div>
             )}
             <div className="space-y-2">

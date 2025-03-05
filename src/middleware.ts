@@ -37,9 +37,16 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Define public routes that don't require authentication
-  const publicRoutes = ['/login', '/signup', '/auth/reset-password']
+  // Define routes that don't require authentication
+  const publicRoutes = ['/login', '/signup', '/auth/reset-password', '/auth/callback']
   const isPublicRoute = publicRoutes.some(path => request.nextUrl.pathname.startsWith(path))
+  
+  // Special case for reset-password/update route - allow authenticated access for password reset
+  const isPasswordResetUpdate = request.nextUrl.pathname.startsWith('/auth/reset-password/update')
+  
+  // Define login/signup pages that should redirect to home if user is already signed in
+  const authOnlyRoutes = ['/login', '/signup']
+  const isAuthOnlyRoute = authOnlyRoutes.some(path => request.nextUrl.pathname.startsWith(path))
 
   // If the user is not signed in and the route is not public, redirect to login
   if (!user && !isPublicRoute) {
@@ -48,8 +55,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // If the user is signed in and trying to access auth pages, redirect to home
-  if (user && isPublicRoute) {
+  // If the user is signed in and trying to access login/signup pages, redirect to home
+  // But allow access to password reset update page even when authenticated
+  if (user && isAuthOnlyRoute) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
