@@ -78,10 +78,10 @@ export function ProfileSettings({ user, profile }: ProfileSettingsProps) {
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          disabled={isSubmitting}
+          disabled
         />
         <p className="text-xs text-muted-foreground">
-          Your name will be displayed on your profile and in communications.
+          Your name will be displayed on your profile and in communications in the future.
         </p>
       </div>
       

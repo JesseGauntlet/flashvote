@@ -28,13 +28,36 @@ export default function LoginPage() {
       setError('')
       setMessage('')
       setLoading(true)
+      
+      // Call the signIn function - this will redirect on success
+      // or return an error object if authentication fails
       const result = await signIn(formData)
+      
+      // If we get here, it means there was an error with the login
+      // and no redirect happened
       if (result?.error) {
         setError(result.error)
+        setLoading(false)
       }
-    } catch {
+    } catch (e) {
+      // We should only reach this catch block for unexpected errors
+      // not for the redirect which is expected behavior
+      
+      // Check if this is a redirect, which we can safely ignore
+      // because redirects throw a NEXT_REDIRECT type of error
+      const error = e as Error
+      if (error.message && (
+        error.message.includes('NEXT_REDIRECT') || 
+        error.message.includes('Navigation') ||
+        error.message.includes('redirect')
+      )) {
+        // This is an expected redirect, not an error
+        // Don't set any error state
+        return
+      }
+      
+      // This is an actual unexpected error
       setError('An unexpected error occurred')
-    } finally {
       setLoading(false)
     }
   }

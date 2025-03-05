@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProfileSettings } from './ProfileSettings';
 import { PasswordSettings } from './PasswordSettings';
-import { PremiumSettings } from './PremiumSettings';
 
 export default async function SettingsPage() {
   const session = await requireSession();
@@ -54,19 +53,6 @@ export default async function SettingsPage() {
             </CardHeader>
             <CardContent>
               <PasswordSettings />
-            </CardContent>
-          </Card>
-          
-          {/* Premium Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Premium Status</CardTitle>
-              <CardDescription>
-                Manage your subscription
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PremiumSettings isPremium={profile?.is_premium || false} />
             </CardContent>
           </Card>
         </div>
