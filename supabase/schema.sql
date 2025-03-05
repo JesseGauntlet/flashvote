@@ -8,6 +8,7 @@ create table if not exists profiles (
     name text,
     email text,
     is_premium boolean default false,
+    creator boolean default false,
     metadata jsonb,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -125,10 +126,13 @@ create policy "Owners can update their events"
     using (auth.uid() = owner_id)
     with check (auth.uid() = owner_id);
 
--- Events: Authenticated users can create events
-create policy "Authenticated users can create events"
+-- Events: Only creator users can create events
+create policy "Creators can create events"
     on events for insert
-    with check (auth.uid() = owner_id);
+    with check (auth.uid() = owner_id and exists (
+        select 1 from profiles 
+        where id = auth.uid() and creator = true
+    ));
 
 -- Items: Anyone can read items of non-archived events
 create policy "Anyone can read items"
@@ -267,8 +271,8 @@ create trigger update_locations_updated_at
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, is_premium, email, metadata)
-  values (new.id, false, new.email, '{}');
+  insert into public.profiles (id, is_premium, email, creator, metadata)
+  values (new.id, false, new.email, false, '{}');
   return new;
 end;
 $$ language plpgsql security definer;

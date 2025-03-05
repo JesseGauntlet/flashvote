@@ -13,6 +13,7 @@ interface Profile {
   name: string | null;
   email: string | null;
   is_premium: boolean;
+  creator: boolean;
 }
 
 interface ProfileSettingsProps {

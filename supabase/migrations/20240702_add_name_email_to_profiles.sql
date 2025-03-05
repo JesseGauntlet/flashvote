@@ -19,8 +19,8 @@ AND p.email IS NULL;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, is_premium, email, metadata)
-  VALUES (NEW.id, false, NEW.email, '{}');
+  INSERT INTO public.profiles (id, is_premium, email, creator, metadata)
+  VALUES (NEW.id, false, NEW.email, false, '{}');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

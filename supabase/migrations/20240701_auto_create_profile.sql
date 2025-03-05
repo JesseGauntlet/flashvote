@@ -7,8 +7,8 @@ DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, is_premium, metadata)
-  VALUES (NEW.id, false, '{}');
+  INSERT INTO public.profiles (id, is_premium, creator, metadata)
+  VALUES (NEW.id, false, false, '{}');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -22,8 +22,8 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Create profiles for existing users who don't have one yet
-INSERT INTO public.profiles (id, is_premium, metadata)
-SELECT id, false, '{}'
+INSERT INTO public.profiles (id, is_premium, creator, metadata)
+SELECT id, false, false, '{}'
 FROM auth.users
 WHERE id NOT IN (SELECT id FROM public.profiles);
 
