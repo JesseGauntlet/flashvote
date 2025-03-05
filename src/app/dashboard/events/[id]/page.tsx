@@ -14,17 +14,18 @@ import LocationsList from './LocationsList';
 import { Toaster } from 'sonner';
 
 interface EventPageProps {
-  params: {
-    id: string;
-  };
-  searchParams: {
-    tab?: string;
-  };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }
 
 // Types are defined in ./types.d.ts and used by the imported components
 
 export default async function EventPage({ params, searchParams }: EventPageProps) {
+  // Await params and searchParams since they're now Promises in Next.js 15+
+  const { id } = await params;
+  const { tab } = await searchParams;
+  const tabParam = tab || 'event';
+  
   const session = await requireSession();
   const isCreator = await getCreatorStatus();
   const supabase = await createClient();
@@ -33,7 +34,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const { data: event, error } = await supabase
     .from('events')
     .select('id, title, slug, owner_id, is_premium, archived_at, metadata, created_at, updated_at')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
   
   if (error || !event) {
@@ -46,7 +47,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     const { data: adminRole } = await supabase
       .from('admins')
       .select('role')
-      .eq('event_id', params.id)
+      .eq('event_id', id)
       .eq('user_id', session.user.id)
       .single();
       
@@ -59,21 +60,21 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const { data: subjects } = await supabase
     .from('subjects')
     .select('*')
-    .eq('event_id', params.id)
+    .eq('event_id', id)
     .order('name');
   
   // Fetch items for this event
   const { data: items } = await supabase
     .from('items')
     .select('*')
-    .eq('event_id', params.id)
+    .eq('event_id', id)
     .order('name');
   
   // Fetch locations for this event
   const { data: locations } = await supabase
     .from('locations')
     .select('*')
-    .eq('event_id', params.id)
+    .eq('event_id', id)
     .order('name');
   
   return (
@@ -99,7 +100,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
           </Link>
         </div>
         
-        <Tabs defaultValue={searchParams.tab || 'event'} className="space-y-4">
+        <Tabs defaultValue={tabParam} className="space-y-4">
           <TabsList>
             <TabsTrigger value="event">Event Details</TabsTrigger>
             <TabsTrigger value="subjects">Subjects</TabsTrigger>
@@ -158,7 +159,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LocationsList eventId={params.id} locations={locations || []} />
+                <LocationsList eventId={id} locations={locations || []} />
               </CardContent>
             </Card>
           </TabsContent>
