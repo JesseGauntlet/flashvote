@@ -182,4 +182,13 @@ export function SingleSubjectVotesProvider({
       {children}
     </VotesProvider>
   );
+}
+
+// New safe hook to call useSubjectVotes without throwing if provider is missing
+export function useSafeSubjectVotes(subjectId: string) {
+  try {
+    return useSubjectVotes(subjectId);
+  } catch {
+    return null;
+  }
 } 

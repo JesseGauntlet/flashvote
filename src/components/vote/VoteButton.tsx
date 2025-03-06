@@ -44,8 +44,7 @@ export function VoteButton({
   try {
     const votesContext = useVotes();
     optimisticVote = votesContext.optimisticVote;
-  } catch (error) {
-    // VotesProvider not available, will proceed without optimistic updates
+  } catch {
     console.debug('VotesProvider not available for optimistic updates');
   }
 

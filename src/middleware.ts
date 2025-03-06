@@ -37,9 +37,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Define routes that don't require authentication
-  const publicRoutes = ['/login', '/signup', '/auth/reset-password', '/auth/callback']
-  const isPublicRoute = publicRoutes.some(path => request.nextUrl.pathname.startsWith(path))
+  // Define routes that don't require authentication - kept as a comment for context
+  // const publicRoutes = ['/login', '/signup', '/auth/reset-password', '/auth/callback']
   
   // Note: We previously had special handling for reset-password/update route,
   // but it's now handled by the public routes check above
@@ -55,8 +54,11 @@ export async function middleware(request: NextRequest) {
 
   // If the user is not signed in and the route is not public, redirect to login
   // Commented out to support anonymous/unauthenticated voting
-  // If needed again in the future, uncomment the following block:
+  // If needed again in the future, uncomment the following block and restore the publicRoutes variable:
   /*
+  const isPublicRoute = ['/login', '/signup', '/auth/reset-password', '/auth/callback']
+    .some(path => request.nextUrl.pathname.startsWith(path));
+    
   if (!user && !isPublicRoute) {
     const redirectUrl = new URL('/login', request.url)
     redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)

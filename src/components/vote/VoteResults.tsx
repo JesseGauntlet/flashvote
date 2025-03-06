@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Progress } from '@/components/ui/progress';
 import { useLocation } from '@/components/location/LocationContext';
-import { useVotes, useSubjectVotes } from './VotesProvider';
+import { useVotes, useSafeSubjectVotes } from './VotesProvider';
 
 export interface VoteResultsProps {
   subjectId: string;
@@ -30,14 +30,8 @@ export function VoteResults({
   // Try to get votes from context first (for optimistic updates)
   const votesContext = useVotes();
   
-  // Use the useSubjectVotes hook to get vote data
-  let subjectVotes;
-  try {
-    subjectVotes = useSubjectVotes(subjectId);
-  } catch (e) {
-    // If the hook fails (not in a VotesProvider context), we'll fall back to direct fetching
-    subjectVotes = null;
-  }
+  // Use the useSafeSubjectVotes hook to get vote data
+  const subjectVotes = useSafeSubjectVotes(subjectId);
   
   const [posCount, setPosCount] = useState(subjectVotes?.posCount || 0);
   const [negCount, setNegCount] = useState(subjectVotes?.negCount || 0);
