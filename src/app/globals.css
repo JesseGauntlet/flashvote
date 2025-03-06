@@ -123,3 +123,30 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom animations for vote buttons */
+@keyframes pulse-orange {
+  0%, 100% {
+    background-color: #FF9800;
+  }
+  50% {
+    background-color: #FFC107;
+  }
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    background-color: #D32F2F;
+  }
+  50% {
+    background-color: #B71C1C;
+  }
+}
+
+.animate-pulse-green {
+  animation: pulse-orange 0.5s ease-in-out;
+}
+
+.animate-pulse-red {
+  animation: pulse-red 0.5s ease-in-out;
+}

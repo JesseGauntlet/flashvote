@@ -84,7 +84,9 @@ export function VoteButton({
       size={size}
       className={cn(
         size === 'sm' ? 'h-8 px-3' : 'flex-1',
-        variant === 'positive' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700',
+        variant === 'positive' 
+          ? 'bg-[#FF9800] hover:bg-[#FFC107]' 
+          : 'bg-[#D32F2F] hover:bg-[#B71C1C]',
         showFeedback && variant === 'positive' ? 'animate-pulse-green' : '',
         showFeedback && variant === 'negative' ? 'animate-pulse-red' : '',
         'transition-all duration-300'
