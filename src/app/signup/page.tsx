@@ -36,7 +36,7 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create an account</CardTitle>
-          <CardDescription>Sign up for FlashVote</CardDescription>
+          <CardDescription>Sign up to view vote history</CardDescription>
         </CardHeader>
         <form action={handleSubmit}>
           <CardContent className="space-y-4">
@@ -50,15 +50,6 @@ export default function SignUpPage() {
                 {message}
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                required
-                autoComplete="name"
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

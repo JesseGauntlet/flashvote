@@ -54,11 +54,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // If the user is not signed in and the route is not public, redirect to login
+  // Commented out to support anonymous/unauthenticated voting
+  // If needed again in the future, uncomment the following block:
+  /*
   if (!user && !isPublicRoute) {
     const redirectUrl = new URL('/login', request.url)
     redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
   }
+  */
 
   // If the user is signed in and trying to access login/signup pages, redirect to home
   // But allow access to password reset update page even when authenticated

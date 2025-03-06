@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Toaster } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import Image from 'next/image';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -20,7 +21,14 @@ export function MainLayout({ children }: MainLayoutProps) {
       
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold">
+          <Link href="/" className="text-2xl font-bold flex items-center gap-2">
+            <Image 
+              src="/favicon-32x32.png" 
+              alt="HotDogHot Logo" 
+              width={24} 
+              height={24} 
+              className="inline-block"
+            />
             HotDogHot
           </Link>
           <nav className="flex items-center gap-4 h-10">
