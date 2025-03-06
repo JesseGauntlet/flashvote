@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useLocation } from '@/components/location/LocationContext';
+import { useVotes } from './VotesProvider';
 
 export interface VoteButtonProps {
   subjectId: string;
@@ -37,9 +38,25 @@ export function VoteButton({
   
   const [isLoading, setIsLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  
+  // Try to get optimisticVote from context, but don't fail if not available
+  let optimisticVote: ((subjectId: string, choice: boolean) => void) | undefined;
+  try {
+    const votesContext = useVotes();
+    optimisticVote = votesContext.optimisticVote;
+  } catch (error) {
+    // VotesProvider not available, will proceed without optimistic updates
+    console.debug('VotesProvider not available for optimistic updates');
+  }
 
   const handleVote = async () => {
     setIsLoading(true);
+    
+    // Immediately update the UI optimistically if the function is available
+    if (optimisticVote) {
+      optimisticVote(subjectId, choice);
+    }
+    
     try {
       const response = await fetch('/api/votes', {
         method: 'POST',

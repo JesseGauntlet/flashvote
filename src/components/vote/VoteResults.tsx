@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Progress } from '@/components/ui/progress';
 import { useLocation } from '@/components/location/LocationContext';
+import { useVotes, useSubjectVotes } from './VotesProvider';
 
 export interface VoteResultsProps {
   subjectId: string;
@@ -26,12 +27,36 @@ export function VoteResults({
   const { selectedLocation } = useLocation();
   const effectiveLocationId = locationId || (selectedLocation?.id);
   
-  const [posCount, setPosCount] = useState(0);
-  const [negCount, setNegCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  // Try to get votes from context first (for optimistic updates)
+  const votesContext = useVotes();
+  
+  // Use the useSubjectVotes hook to get vote data
+  let subjectVotes;
+  try {
+    subjectVotes = useSubjectVotes(subjectId);
+  } catch (e) {
+    // If the hook fails (not in a VotesProvider context), we'll fall back to direct fetching
+    subjectVotes = null;
+  }
+  
+  const [posCount, setPosCount] = useState(subjectVotes?.posCount || 0);
+  const [negCount, setNegCount] = useState(subjectVotes?.negCount || 0);
+  const [isLoading, setIsLoading] = useState(!subjectVotes);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // If we have subject votes from context, use those values
+    if (subjectVotes) {
+      setPosCount(subjectVotes.posCount);
+      setNegCount(subjectVotes.negCount);
+      setIsLoading(false);
+    }
+  }, [subjectVotes]);
+
+  useEffect(() => {
+    // Skip fetching if we're using votes from context
+    if (subjectVotes) return;
+    
     const fetchVotes = async () => {
       setIsLoading(true);
       setError(null);
@@ -75,6 +100,11 @@ export function VoteResults({
         
         setPosCount(posData?.length || 0);
         setNegCount(negData?.length || 0);
+        
+        // If we have a votes context, try to update it with the fetched data
+        if (votesContext) {
+          // We can't directly update the context, but we can use it for future optimistic updates
+        }
       } catch (err) {
         console.error('Error fetching votes:', err);
         setError('Failed to load voting results');
@@ -113,7 +143,7 @@ export function VoteResults({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [subjectId, effectiveLocationId]);
+  }, [subjectId, effectiveLocationId, votesContext, subjectVotes]);
 
   const totalVotes = posCount + negCount;
   const posPercentage = totalVotes > 0 ? Math.round((posCount / totalVotes) * 100) : 50;

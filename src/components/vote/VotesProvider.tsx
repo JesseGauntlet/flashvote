@@ -13,6 +13,7 @@ type VotesContextType = {
   isLoading: boolean;
   error: string | null;
   refetchVotes: () => Promise<void>;
+  optimisticVote: (subjectId: string, choice: boolean) => void;
 };
 
 const VotesContext = createContext<VotesContextType | undefined>(undefined);
@@ -94,11 +95,32 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
     };
   }, [fetchVotes, subjectIds, locationId]);
 
+  // Function to optimistically update vote counts
+  const optimisticVote = useCallback((subjectId: string, choice: boolean) => {
+    setVoteResults(prevResults => {
+      // Get current results for this subject or initialize if not exists
+      const currentResult = prevResults[subjectId] || { positive: 0, negative: 0 };
+      
+      // Create a new result object with the updated count
+      const newResult = {
+        positive: choice ? currentResult.positive + 1 : currentResult.positive,
+        negative: !choice ? currentResult.negative + 1 : currentResult.negative
+      };
+      
+      // Return updated results
+      return {
+        ...prevResults,
+        [subjectId]: newResult
+      };
+    });
+  }, []);
+
   const value = {
     voteResults,
     isLoading,
     error,
-    refetchVotes: fetchVotes
+    refetchVotes: fetchVotes,
+    optimisticVote
   };
 
   return (
@@ -134,4 +156,26 @@ export function useSubjectVotes(subjectId: string) {
     isLoading,
     error
   };
+}
+
+// A simplified provider for a single subject
+interface SingleSubjectVotesProviderProps {
+  subjectId: string;
+  locationId?: string;
+  children: React.ReactNode;
+}
+
+export function SingleSubjectVotesProvider({ 
+  subjectId, 
+  locationId, 
+  children 
+}: SingleSubjectVotesProviderProps) {
+  return (
+    <VotesProvider 
+      subjectIds={[subjectId]} 
+      locationId={locationId}
+    >
+      {children}
+    </VotesProvider>
+  );
 } 
