@@ -40,13 +40,17 @@ export function VotesProvider({ subjectIds, locationId, children }: VotesProvide
     setError(null);
 
     try {
-      const queryParams = new URLSearchParams();
-      queryParams.set('subject_ids', subjectIds.join(','));
-      if (locationId) {
-        queryParams.set('location_id', locationId);
-      }
-
-      const response = await fetch(`/api/votes/batch?${queryParams.toString()}`);
+      // Use POST endpoint instead of GET to handle large numbers of subject IDs
+      const response = await fetch('/api/votes/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subject_ids: subjectIds,
+          location_id: locationId,
+        }),
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch votes data');
